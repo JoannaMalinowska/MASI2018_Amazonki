@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pai.webservice.model.ResponseObject;
 import com.pai.webservice.notifications.Notification;
+import com.pai.webservice.service.AmazonResponseService;
 import com.pai.webservice.service.AmazonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,9 @@ public class AmazonController {
     @Autowired
     private AmazonService amazonService;
 
+    @Autowired
+    private AmazonResponseService amazonResponseService;
+
     @GetMapping(value = "")
     public @ResponseBody
     ResponseEntity getResult() {
@@ -30,9 +34,9 @@ public class AmazonController {
         amazonService.setSearchCategory("Books");
         amazonService.prepareKeywordsForRequest(new ArrayList<String>(){{add("Java");}});
 
-        ItemSearchResponse response = amazonService.getResultFromRequest();
+        amazonResponseService.setAmazonResponse(amazonService.getResultFromRequest());
 
-        JsonNode returnData = mapper.valueToTree(response);
+        JsonNode returnData = mapper.valueToTree(amazonResponseService.getQuantityResults());
         return new ResponseEntity<>(ResponseObject.createSuccess(Notification.TEST_GET_SUCCESS, returnData), HttpStatus.OK);
     }
 

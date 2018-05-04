@@ -10,15 +10,15 @@
 
 	<link rel="stylesheet" type="text/css" href="style.css">
 	
-
+	<script type="text/javascript" src="jquery.min.js"></script>
 	
 </head>
 
 <body>
 		
 
-	<div class="chatbox">
-		<div class="messages">
+	<div class="chatbox" name="chatbox" id="chatbox">
+		<div class="messages" name="messages" id="messages">
 			<div class="chat bot">
 				<div class="user-photo"></div>
 				<p class="message1">Wiadomosc bota</p>
@@ -37,17 +37,16 @@
 
 			</div>
 
-			<div class="chat user">
-				<div class="user-photo"></div>
-				<p class="message1">Wiadomosc usera sdf sdf sdlf lsd flskd gls glsd fla fsldg sdfsd fsd fsdfs df sd f sd f sd fs df sd f sdf ds fsd fsd f sdfsdfsdfsd fsd fsdfs dfs df sdfsdfsd f sdfsdfsdfsd fsdf sdfs dfsdfs dfs dfsdfsdfsdf sdfsdfsdf sdfsdf sdfsdf sdf sd f sdfsdfsdfsdfsd fsd fsdf sd 	asdasdasd asdasdasd asdasdasd asdasdasd asdasdasdas dasdasdasd asdasdasdas dasdasdasda adasd a das da sdas d asd as da sd asd as das d as das da sda sd as dasdasdasd as das das das d asd as da sd sd as dsa d assdasdasdasd asd as das d asda sd as das d as d sa d   s ddsdasdasdasd as d asd as d as da sd as da sd as d asd as d asd as d as das d as d as d asd as d as da sd a sd as das d as da sd as da s
-			</div>
 
 		</div>
 
 		<div class="bottom">
 			<br />
-			<textarea></textarea>
-			<button>Send</button>
+			<textarea id="textarea"></textarea>
+			<button name="send" id="send">Send</button>
+
+			<input type="hidden" name="hidden_string" id="hidden_string" value="234">
+		
 		</div>
 
 	</div>
@@ -55,3 +54,71 @@
 			
 </body>
 </html>
+
+<script>
+
+	$('#send').on('click', function(){
+
+		
+		var scan = document.getElementById("textarea").value;
+
+		if(scan == ""){
+			alert("Nic nie wpisałeś!!!");
+		}else{
+
+		var html_code_user = '<div class="chat user"><div class="user-photo"></div><p class="message1">'+scan+'</p></div>';
+		handler();    	
+		$('.messages').append(html_code_user);
+		scroll();
+		$('#hidden_string').val(scan);	
+		$('textarea').val('');
+		$("textarea").prop('disabled', true);
+	}	
+	});
+
+	
+
+	function handler(){
+
+	$('.messages').on("DOMSubtreeModified",function(){
+  	
+  		var scan = document.getElementById("hidden_string").value;
+  		$.ajax({
+			url: "test.php",
+				method: "POST",
+				data:{scan:scan},
+				dataType: "text",
+				success:function(data)
+				{
+					
+					var answer_bot = data;
+					var html_code_bot = '<div class="chat bot"><div class="user-photo"></div><p class="message1">'+answer_bot+'</p></div>';
+					$('.messages').off();
+					setTimeout(function(){
+    				$('.messages').append(html_code_bot);
+					scroll();
+					$("textarea").prop('disabled', false);
+					$("textarea").focus();
+					}, 1000);
+					
+				
+				}
+
+		});
+
+	
+	});
+
+	}
+
+	function scroll(){
+		$('#messages').scrollTop(100000000);
+	}
+
+	$(document).keypress(function(e){
+    if (e.which == 13){
+        $("#send").click();
+    		}
+	});
+
+	</script>

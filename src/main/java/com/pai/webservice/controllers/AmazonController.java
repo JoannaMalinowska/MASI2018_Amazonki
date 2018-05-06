@@ -13,7 +13,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping(value = "/amazon")
@@ -27,12 +29,12 @@ public class AmazonController {
     @Autowired
     private AmazonResponseService amazonResponseService;
 
-    @GetMapping(value = "")
+    @PostMapping(value = "")
     public @ResponseBody
-    ResponseEntity getResult() {
+    ResponseEntity getResult(@Valid @RequestBody List<String> keywords) {
 
         amazonService.setSearchCategory("Books");
-        amazonService.prepareKeywordsForRequest(new ArrayList<String>(){{add("Java");}});
+        amazonService.prepareKeywordsForRequest(keywords);
 
         amazonResponseService.setAmazonResponse(amazonService.getResultFromRequest());
 

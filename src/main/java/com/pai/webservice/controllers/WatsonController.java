@@ -1,5 +1,6 @@
 package com.pai.webservice.controllers;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pai.webservice.model.ResponseObject;
@@ -43,7 +44,6 @@ public class WatsonController {
     ResponseEntity processWatson(@Valid @RequestBody String inputText) {
 
 
-
         //connect with Watson - Assistant
         Assistant Assistantservice = new Assistant("2018-02-16");
         Assistantservice.setUsernameAndPassword("eb12a14a-da23-4b5c-9f3f-d756e8f02ec2", "GJGAnVtaLuaP");
@@ -54,13 +54,13 @@ public class WatsonController {
         //String InputText ="Give me a funny book and tasty toast";
 
 //Send InputText to analyze by Watson Assistant
-        InputData input = new InputData.Builder(inputText).build();
-
-        MessageOptions options = new MessageOptions.Builder(workspaceId)
-                .input(input)
-                .build();
-
-        MessageResponse AssistantResponse = Assistantservice.message(options).execute();
+//        InputData input = new InputData.Builder(inputText).build();
+//
+//        MessageOptions options = new MessageOptions.Builder(workspaceId)
+//                .input(input)
+//                .build();
+//
+//        MessageResponse AssistantResponse = Assistantservice.message(options).execute();
 
         //     System.out.println(AssistantResponse.getOutput().getText());
         //      System.out.println(AssistantResponse.getIntents());

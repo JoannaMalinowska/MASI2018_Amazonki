@@ -38,7 +38,7 @@ public class AmazonController {
 
         amazonResponseService.setAmazonResponse(amazonService.getResultFromRequest());
 
-        JsonNode returnData = mapper.valueToTree(amazonResponseService.getQuantityResults());
+        JsonNode returnData = mapper.valueToTree(amazonResponseService.getLinkWithFinalResults());
         return new ResponseEntity<>(ResponseObject.createSuccess(Notification.TEST_GET_SUCCESS, returnData), HttpStatus.OK);
     }
 

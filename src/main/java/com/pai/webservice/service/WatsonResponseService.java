@@ -1,4 +1,29 @@
 package com.pai.webservice.service;
 
-public class WatsonResponseService {
+import am.ik.aws.apa.jaxws.ItemSearchResponse;
+import am.ik.aws.apa.jaxws.Items;
+import org.springframework.stereotype.Service;
+
+import java.math.BigInteger;
+
+@Service
+public class WatsonResponseService implements IWatsonResponseService {
+
+    private ItemSearchResponse amazonResponse;
+    private Items item;
+
+    public void setAmazonResponse(ItemSearchResponse amazonResponse) {
+        this.amazonResponse = amazonResponse;
+        this.item = amazonResponse.getItems().get(0);
+    }
+
+    @Override
+    public String getLinkWithFinalResults() {
+        return item.getMoreSearchResultsUrl();
+    }
+
+    @Override
+    public BigInteger getQuantityResults() {
+        return item.getTotalResults();
+    }
 }

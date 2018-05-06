@@ -30,5 +30,7 @@ dependencies {
     compile (group: 'joda-time', name: 'joda-time', version: '2.9.9')
     compile (group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1')
     compile ('am.ik.aws:aws-apa:0.9.5')
+    compile('com.ibm.watson.developer_cloud:assistant:5.4.0')
+    compile('com.ibm.watson.developer_cloud:natural-language-understanding:5.4.0')
     testCompile('org.springframework.boot:spring-boot-starter-test')
 }

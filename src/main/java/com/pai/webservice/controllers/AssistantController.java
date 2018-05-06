@@ -29,8 +29,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/watson")
-public class WatsonController {
+@RequestMapping(value = "/watsonAst")
+public class AssistantController {
 
     private static ObjectMapper mapper = new ObjectMapper();
 
@@ -45,38 +45,23 @@ public class WatsonController {
     public @ResponseBody
     ResponseEntity processWatson(@Valid @RequestBody String inputText) {
 
-//connect with Watson - Natural Language Understanding
-        NaturalLanguageUnderstanding NLUservice = new NaturalLanguageUnderstanding(
-                "2018-03-16",
-                "219783e0-f7c9-47f4-9c30-4baf3eaa424c",
-                "t8TsyDcM6C8W"
-        );
+        //connect with Watson - Assistant
+        Assistant Assistantservice = new Assistant("2018-02-16");
+        Assistantservice.setUsernameAndPassword("eb12a14a-da23-4b5c-9f3f-d756e8f02ec2", "GJGAnVtaLuaP");
 
-//Set analyze options
-        KeywordsOptions keywordsOptions = new KeywordsOptions.Builder()
+        String workspaceId = "bb7f5b28-50f0-49ae-a454-df7799de94a3";
+
+        InputData input = new InputData.Builder(inputText).build();
+
+        MessageOptions options = new MessageOptions.Builder(workspaceId)
+                .input(input)
                 .build();
 
-        Features features = new Features.Builder()
-                .keywords(keywordsOptions)
-                .build();
+        MessageResponse AssistantResponse = Assistantservice.message(options).execute();
 
-        AnalyzeOptions parameters = new AnalyzeOptions.Builder()
-                .text(inputText)
-                .features(features)
-                .build();
-
-//Analyze inputText in Watson - NLU
-        AnalysisResults NLUresponse = NLUservice
-                .analyze(parameters)
-                .execute();
-
-
-
-        JsonNode returnData = mapper.valueToTree(  NLUresponse.getKeywords());
+        JsonNode returnData = mapper.valueToTree( AssistantResponse.getOutput().getText());
 
         return new ResponseEntity<>(ResponseObject.createSuccess(Notification.TEST_GET_SUCCESS,returnData), HttpStatus.OK);
-//return new ResponseEntity<> (ResponseObject.createSuccess(Notification.TEST_GET_SUCCESS, NLUresponse.getKeywords()),HttpStatus.OK);
-
     }
 
 }

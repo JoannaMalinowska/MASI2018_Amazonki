@@ -25,6 +25,13 @@ public class CentralController {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<String> entityWatsonAss = new HttpEntity<String>(inputText, headers);
+        ResponseEntity<ResponseObject> watsonAssResponse = restTemplate.exchange("http://localhost:8080/api/watsonAst", HttpMethod.POST,entityWatsonAss,ResponseObject.class);
+
+        JsonNode assData = watsonAssResponse.getBody().getData();
+
+
         HttpEntity<String> entityWatson = new HttpEntity<String>(inputText, headers);
         ResponseEntity<ResponseObject> watsonResponse = restTemplate.exchange("http://localhost:8080/api/watson", HttpMethod.POST,entityWatson,ResponseObject.class);
 

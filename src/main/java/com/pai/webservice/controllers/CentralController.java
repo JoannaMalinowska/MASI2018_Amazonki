@@ -32,22 +32,27 @@ public class CentralController {
         JsonNode assData = watsonAssResponse.getBody().getData();
 
 
-        HttpEntity<String> entityWatson = new HttpEntity<String>(inputText, headers);
-        ResponseEntity<ResponseObject> watsonResponse = restTemplate.exchange("http://localhost:8080/api/watson", HttpMethod.POST,entityWatson,ResponseObject.class);
+//        assData.get("giveAmazonURL").asInt();
 
-        JsonNode data = watsonResponse.getBody().getData();
-        List<String> keywords = new ArrayList<>();
+        if (assData.get("toAnalyze").asInt() ==1 ) {
+            HttpEntity<String> entityWatson = new HttpEntity<String>(inputText, headers);
+            ResponseEntity<ResponseObject> watsonResponse = restTemplate.exchange("http://localhost:8080/api/watson", HttpMethod.POST, entityWatson, ResponseObject.class);
 
-        for(int i=0; i< data.size(); i++){
-            JsonNode keyword = data.get(i);
-            keywords.add(keyword.get("text").asText());
+            JsonNode data = watsonResponse.getBody().getData();
+            List<String> keywords = new ArrayList<>();
+
+            for (int i = 0; i < data.size(); i++) {
+                JsonNode keyword = data.get(i);
+                keywords.add(keyword.get("text").asText());
+            }
+
+            HttpEntity<List<String>> entityAmazon = new HttpEntity<List<String>>(keywords, headers);
+            ResponseEntity<ResponseObject> amazonResponse = restTemplate.exchange("http://localhost:8080/api/amazon", HttpMethod.POST, entityAmazon, ResponseObject.class);
+
+
         }
+        JsonNode returnData = mapper.valueToTree(assData.get("watsonData").asText());
 
-        HttpEntity<List<String>> entityAmazon = new HttpEntity<List<String>>(keywords, headers);
-        ResponseEntity<ResponseObject> amazonResponse = restTemplate.exchange("http://localhost:8080/api/amazon", HttpMethod.POST,entityAmazon,ResponseObject.class);
-
-
-        JsonNode returnData = mapper.valueToTree("Halo");
         return new ResponseEntity<>(ResponseObject.createSuccess(Notification.TEST_GET_SUCCESS, returnData), HttpStatus.OK);
     }
 

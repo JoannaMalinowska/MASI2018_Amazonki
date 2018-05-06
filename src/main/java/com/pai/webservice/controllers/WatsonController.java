@@ -75,7 +75,6 @@ public class WatsonController {
         JsonNode returnData = mapper.valueToTree(  NLUresponse.getKeywords());
 
         return new ResponseEntity<>(ResponseObject.createSuccess(Notification.TEST_GET_SUCCESS,returnData), HttpStatus.OK);
-//return new ResponseEntity<> (ResponseObject.createSuccess(Notification.TEST_GET_SUCCESS, NLUresponse.getKeywords()),HttpStatus.OK);
 
     }
 

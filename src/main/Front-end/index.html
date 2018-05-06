@@ -1,0 +1,124 @@
+<!DOCTYPE HTML>
+<html lang="pl">
+<head>
+
+	<meta charset="utf-8"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	
+	<title>Amazon chatbox</title>
+
+	<link rel="stylesheet" type="text/css" href="style.css">
+	
+	<script type="text/javascript" src="jquery.min.js"></script>
+	
+</head>
+
+<body>
+		
+
+	<div class="chatbox" name="chatbox" id="chatbox">
+		<div class="messages" name="messages" id="messages">
+			<div class="chat bot">
+				<div class="user-photo"></div>
+				<p class="message1">Wiadomosc bota</p>
+
+			</div>
+
+			<div class="chat user">
+				<div class="user-photo"></div>
+				<p class="message1">Wiadomosc usera</p>
+
+			</div>
+
+			<div class="chat bot">
+				<div class="user-photo"></div>
+				<p class="message1">Wiadomosc bota: </p>
+
+			</div>
+
+
+		</div>
+
+		<div class="bottom">
+			<br />
+			<textarea id="textarea"></textarea>
+			<button name="send" id="send">Send</button>
+
+			<input type="hidden" name="hidden_string" id="hidden_string" value="234">
+		
+		</div>
+
+	</div>
+			
+			
+</body>
+</html>
+
+<script>
+
+	$('#send').on('click', function(){
+
+		
+		var scan = document.getElementById("textarea").value;
+
+		if(scan == ""){
+			alert("Nic nie wpisałeś!!!");
+		}else{
+
+		var html_code_user = '<div class="chat user"><div class="user-photo"></div><p class="message1">'+scan+'</p></div>';
+		handler();    	
+		$('.messages').append(html_code_user);
+		scroll();
+		$('#hidden_string').val(scan);	
+		$('textarea').val('');
+		$("textarea").prop('disabled', true);
+	}	
+	});
+
+	
+
+	function handler(){
+
+	$('.messages').on("DOMSubtreeModified",function(){
+  	
+  		var scan = document.getElementById("hidden_string").value;
+  		$.ajax({
+			url: "test.php",
+				method: "POST",
+				data:{scan:scan},
+				dataType: "text",
+				success:function(data)
+				{
+					
+					var answer_bot = data;
+					var html_code_bot = '<div class="chat bot"><div class="user-photo"></div><p class="message1">'+answer_bot+'</p></div>';
+					$('.messages').off();
+					setTimeout(function(){
+    				$('.messages').append(html_code_bot);
+					scroll();
+					$("textarea").prop('disabled', false);
+					$("textarea").focus();
+					}, 1000);
+					
+				
+				}
+
+		});
+
+	
+	});
+
+	}
+
+	function scroll(){
+		$('#messages').scrollTop(100000000);
+	}
+
+	$(document).keypress(function(e){
+    if (e.which == 13){
+        $("#send").click();
+    		}
+	});
+
+	</script>

@@ -45,7 +45,7 @@
 			<textarea id="textarea"></textarea>
 			<button name="send" id="send">Send</button>
 
-			<input type="hidden" name="hidden_string" id="hidden_string" value="234">
+			<input type="hidden" name="hidden_string" id="hidden_string">
 		
 		</div>
 
@@ -67,10 +67,11 @@
 		}else{
 
 		var html_code_user = '<div class="chat user"><div class="user-photo"></div><p class="message1">'+scan+'</p></div>';
+		$('#hidden_string').val(scan);
 		handler();    	
 		$('.messages').append(html_code_user);
 		scroll();
-		$('#hidden_string').val(scan);	
+	
 		$('textarea').val('');
 		$("textarea").prop('disabled', true);
 	}	
@@ -82,16 +83,19 @@
 
 	$('.messages').on("DOMSubtreeModified",function(){
   	
-  		var scan = document.getElementById("hidden_string").value;
+  		var scan = $('#hidden_string').val();
   		$.ajax({
-			url: "test.php",
+			url: "http://localhost:8080/api/central",
 				method: "POST",
-				data:{scan:scan},
-				dataType: "text",
+				data:scan,
+				dataType: "json",
+				contentType: "application/json;charset=utf-8",
 				success:function(data)
 				{
-					
-					var answer_bot = data;
+					console.log(data);
+					var answer_bot = JSON.stringify(data.data);
+					answer_bot = answer_bot.replace('"','');
+					answer_bot = answer_bot.replace('"','');
 					var html_code_bot = '<div class="chat bot"><div class="user-photo"></div><p class="message1">'+answer_bot+'</p></div>';
 					$('.messages').off();
 					setTimeout(function(){

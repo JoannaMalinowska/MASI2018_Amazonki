@@ -5,7 +5,7 @@ package com.pai.webservice.notifications;
  */
 public class Notification {
 
-    public static final String USER_GET_SUCCESS = "Użytkownik pobrany";
+    public static final String TEST_GET_SUCCESS = "Test pobrany";
 
     public static final String INVALID_MODEL_STRUCTURE = "Niepoprawna struktura modelu";
 

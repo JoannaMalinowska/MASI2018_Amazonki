@@ -34,7 +34,6 @@ public class WatsonController {
 
     private static ObjectMapper mapper = new ObjectMapper();
 
-
     @Autowired
     private AmazonService amazonService;
 

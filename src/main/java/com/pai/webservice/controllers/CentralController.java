@@ -16,6 +16,7 @@ import java.util.List;
 @RequestMapping(value = "/central")
 public class CentralController {
 
+
     private static ObjectMapper mapper = new ObjectMapper();
 
     @PostMapping(value = "")

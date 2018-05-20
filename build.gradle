@@ -22,8 +22,7 @@ repositories {
 }
 
 
-dependencies {
-    //compile('org.springframework.boot:spring-boot-starter-data-mongodb')
+dependencies { compile('org.springframework.boot:spring-boot-starter-data-mongodb')
     compile group: 'org.apache.commons', name: 'commons-io', version: '1.3.2'
     compile('org.springframework.boot:spring-boot-starter-web')
     compileOnly("org.projectlombok:lombok:1.16.14")

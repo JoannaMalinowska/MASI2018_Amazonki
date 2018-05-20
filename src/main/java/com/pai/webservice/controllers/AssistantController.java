@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ibm.watson.developer_cloud.assistant.v1.model.*;
 import com.pai.webservice.model.AssistantAnswer;
+import com.pai.webservice.model.FrontObj;
 import com.pai.webservice.model.ResponseObject;
+import com.pai.webservice.model.WatsonConv;
 import com.pai.webservice.notifications.Notification;
 import com.pai.webservice.service.AmazonResponseService;
 import com.pai.webservice.service.AmazonService;
@@ -32,12 +34,11 @@ public class AssistantController {
 
     @PostMapping(value = "")
     public @ResponseBody
-    ResponseEntity processWatson(@Valid @RequestBody String inputText) {
+    ResponseEntity processWatson(@Valid @RequestBody FrontObj inputFront) {
 
-        String conversationID = "";
 
-        Integer toAnalyze = 1;
-        Integer giveAmazonURL = 0;
+        String conversationID = inputFront.getCon_id();
+
 
         //connect with Watson - Assistant
         Assistant Assistantservice = new Assistant("2018-02-16");
@@ -52,22 +53,11 @@ public class AssistantController {
 
         LogCollection Log3response = Assistantservice.listLogs(Log3options).execute();
 
-        conversationID =        "91fab0f0-7307-4e9a-85cd-8d0d7c497178";
-     //   String filter = "response.context.conversation_id::" + conversationID;
-        String filter = "logs.response.intents.intent:hello";
+        JsonNode returnData = null;
 
-        ListAllLogsOptions LogsOptions = new ListAllLogsOptions.Builder(filter).build();
+           if (conversationID.equals("-1")) {
 
- //       language::en
-        LogCollection response = Assistantservice.listAllLogs(LogsOptions).execute();
-
-        //   if (converstaionID == "") {
-//LOG 1
-            ListLogsOptions Log1options = new ListLogsOptions.Builder(workspaceId).build();
-
-            LogCollection Log1response = Assistantservice.listLogs(Log1options).execute();
-
-            InputData input = new InputData.Builder(inputText).build();
+            InputData input = new InputData.Builder(inputFront.getText()).build();
 
             MessageOptions options = new MessageOptions.Builder(workspaceId)
                     .input(input)
@@ -77,35 +67,54 @@ public class AssistantController {
 
             List<String> data = AssistantResponse.getOutput().getNodesVisited();
 
+            //ListLogsOptions Log2options = new ListLogsOptions.Builder(workspaceId).build();
 
-        /*       if (data.get(0) == "Welcome" )
+            //LogCollection Log2response = Assistantservice.listLogs(Log2options).execute();
+
+            AssistantAnswer result = new AssistantAnswer(AssistantResponse.getOutput().getText().get(0).replace("[", "").replace("]", ""));
+
+            WatsonConv respone  = new WatsonConv();
+            respone.setCon_id(AssistantResponse.getContext().getConversationId());
+            respone.setAssistantAnswer(result);
+
+            returnData = mapper.valueToTree(respone);
+        }
+
+        else {
+
+               ListLogsOptions Log1options = new ListLogsOptions.Builder(workspaceId).build();
+
+               LogCollection Log1response = Assistantservice.listLogs(Log1options).execute();
+               Context context = null;
+
+               for(int i=0; i< Log1response.getLogs().size();i++)
                {
-                   toAnalyze=0;
+                   LogExport logExport = Log1response.getLogs().get(i);
+                   context =  logExport.getResponse().getContext();
+                   String watsonConversationId =  context.getConversationId();
+                   if(watsonConversationId.equals(conversationID))
+                   {
+                       break;
+                   }
                }
-        */
-            Context test = AssistantResponse.getContext();
-//LOG 2
-            ListLogsOptions Log2options = new ListLogsOptions.Builder(workspaceId).build();
 
-            LogCollection Log2response = Assistantservice.listLogs(Log2options).execute();
-
-            AssistantAnswer result = new AssistantAnswer(toAnalyze, giveAmazonURL, AssistantResponse.getOutput().getText().get(0).replace("[", "").replace("]", ""));
-
-            JsonNode returnData = mapper.valueToTree(result);
-      //  }
-
-     //   else {
-
-/*
             MessageOptions secondMessageOptions = new MessageOptions.Builder()
                     .workspaceId(workspaceId)
-                    .input(new InputData.Builder("about history").build())
-                    .context(AssistantResponse.getContext()) // output context from the first message
+                    .input(new InputData.Builder(inputFront.getText()).build())
+                    .context(context) // output context from the first message
                     .build();
 
             MessageResponse secondResponse = Assistantservice.message(secondMessageOptions).execute();
- */
-    //    }
+
+            AssistantAnswer result = new AssistantAnswer(secondResponse.getOutput().getText().get(0).replace("[", "").replace("]", ""));
+
+               WatsonConv respone  = new WatsonConv();
+               respone.setCon_id(secondResponse.getContext().getConversationId());
+               respone.setAssistantAnswer(result);
+
+            returnData = mapper.valueToTree(respone);
+
+        }
 
         return new ResponseEntity<>(ResponseObject.createSuccess(Notification.TEST_GET_SUCCESS,returnData), HttpStatus.OK);
     }

@@ -3,6 +3,7 @@ package com.pai.webservice.controllers;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pai.webservice.model.FrontObj;
 import com.pai.webservice.model.ResponseObject;
 import com.pai.webservice.notifications.Notification;
 import com.pai.webservice.service.AmazonResponseService;
@@ -43,7 +44,7 @@ public class WatsonController {
 
     @PostMapping(value = "")
     public @ResponseBody
-    ResponseEntity processWatson(@Valid @RequestBody String inputText) {
+    ResponseEntity processWatson(@Valid @RequestBody String input) {
 
 //connect with Watson - Natural Language Understanding
         NaturalLanguageUnderstanding NLUservice = new NaturalLanguageUnderstanding(
@@ -61,7 +62,7 @@ public class WatsonController {
                 .build();
 
         AnalyzeOptions parameters = new AnalyzeOptions.Builder()
-                .text(inputText)
+                .text(input)
                 .features(features)
                 .build();
 

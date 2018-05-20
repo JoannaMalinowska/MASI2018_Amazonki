@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pai.webservice.model.ResponseObject;
 import com.pai.webservice.notifications.Notification;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
@@ -22,6 +23,8 @@ public class CentralController {
     @PostMapping(value = "")
     public @ResponseBody
     ResponseEntity processDialog(@Valid @RequestBody String inputText) {
+
+        String conversationID = "";
 
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();

@@ -42,4 +42,16 @@ public class AmazonController {
         return new ResponseEntity<>(ResponseObject.createSuccess(Notification.TEST_GET_SUCCESS, returnData), HttpStatus.OK);
     }
 
+    @PostMapping(value = "/quantity")
+    public @ResponseBody
+    ResponseEntity getQuantityResult(@Valid @RequestBody List<String> keywords) {
+
+        amazonService.setSearchCategory("Books");
+        amazonService.prepareKeywordsForRequest(keywords);
+
+        amazonResponseService.setAmazonResponse(amazonService.getResultFromRequest());
+
+        JsonNode returnData = mapper.valueToTree(amazonResponseService.getQuantityResults());
+        return new ResponseEntity<>(ResponseObject.createSuccess(Notification.TEST_GET_SUCCESS, returnData), HttpStatus.OK);
+    }
 }

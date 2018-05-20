@@ -6,18 +6,20 @@ import org.springframework.data.annotation.Id;
 import java.util.List;
 
 @Data
-public class MongoDbObject {
+public class MongoDbObject implements Comparable<MongoDbObject> {
 
-    public MongoDbObject(String convId, List<String> keywords, int questions) {
+    public MongoDbObject(String convId, List<String> keywords, int questions, Integer totalResults) {
         this.convId = convId;
         this.keywords = keywords;
         this.questions = questions;
+        this.totalResults = totalResults;
     }
     @Id
     private String id;
     private  String convId;
     private List<String> keywords;
     private int questions;
+    private Integer totalResults;
 
     public int getQuestions() {
         return questions;
@@ -41,5 +43,18 @@ public class MongoDbObject {
 
     public void setKeywords(List<String> keywords) {
         this.keywords = keywords;
+    }
+
+    public Integer getTotalResults() {
+        return totalResults;
+    }
+
+    public void setTotalResults(Integer totalResults) {
+        this.totalResults = totalResults;
+    }
+
+    @Override
+    public int compareTo(MongoDbObject o) {
+        return o.getTotalResults() - this.getTotalResults();
     }
 }

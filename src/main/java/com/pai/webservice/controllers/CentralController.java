@@ -14,6 +14,7 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -42,7 +43,7 @@ public class CentralController {
         }
         else {
             List<MongoDbObject> list = this.mongoObjRepo.findAllByConvId(input.getCon_id());
-            list.stream().sorted((object1, object2) -> object1.getQuestions() -object2.getQuestions());
+            Collections.sort(list);
             MongoDbObject first = list.get(0);
             if(first.getQuestions() >= 8){ // condition for 20 result
                 HttpEntity<List<String>> entityAmazon = new HttpEntity<List<String>>(first.getKeywords(), headers);
@@ -63,8 +64,6 @@ public class CentralController {
 
         String convId = watsonAssResponse.getBody().getData().get("con_id").asText();
 
-        //wwwwww
-
         if (assData.get("watsonData").asText().split("&")[1].equals("W")) {
 
 
@@ -77,23 +76,21 @@ public class CentralController {
             MongoDbObject mongoDbObject = null;
 
             if(isNew){
-                mongoDbObject = new MongoDbObject(convId,new ArrayList<String>(),1);
+                mongoDbObject = new MongoDbObject(convId,new ArrayList<String>(),1,0);
             }
             else{
                 List<MongoDbObject> list =  this.mongoObjRepo.findAllByConvId(convId);
-                list.stream().sorted((object1, object2) -> object1.getQuestions() -object2.getQuestions());
+                Collections.sort(list);
                 MongoDbObject first = this.mongoObjRepo.findAllByConvId(convId).get(0);
-                mongoDbObject = new MongoDbObject(convId,first.getKeywords(),first.getQuestions()+1);
+
+                HttpEntity<List<String>> entityAmazon = new HttpEntity<List<String>>(first.getKeywords(), headers);
+                ResponseEntity<ResponseObject> amazonResponse = restTemplate.exchange("http://localhost:8080/api/amazon/quantity", HttpMethod.POST, entityAmazon, ResponseObject.class);
+
+                mongoDbObject = new MongoDbObject(convId,first.getKeywords(),first.getQuestions()+1,amazonResponse.getBody().getData().asInt());
 
 
             }
-
-            try {
-                mongoObjRepo.save(mongoDbObject);
-            }
-            catch (Exception e){
-                String k = "M";
-            }
+            mongoObjRepo.save(mongoDbObject);
 
             return new ResponseEntity<>(ResponseObject.createSuccess(Notification.TEST_GET_SUCCESS, returnData), HttpStatus.OK);
 
@@ -116,17 +113,23 @@ public class CentralController {
             MongoDbObject mongoDbObject = null;
 
             if(isNew){
-                mongoDbObject = new MongoDbObject(convId,keywords,1);
+                HttpEntity<List<String>> entityAmazon = new HttpEntity<List<String>>(keywords, headers);
+                ResponseEntity<ResponseObject> amazonResponse = restTemplate.exchange("http://localhost:8080/api/amazon/quantity", HttpMethod.POST, entityAmazon, ResponseObject.class);
+
+                mongoDbObject = new MongoDbObject(convId,keywords,1,amazonResponse.getBody().getData().asInt());
             }
             else{
                 List<MongoDbObject> list =  this.mongoObjRepo.findAllByConvId(convId);
-                list.stream().sorted((object1, object2) -> object1.getQuestions() -object2.getQuestions());
+                Collections.sort(list);
                 MongoDbObject first = list.get(0);
 
-                List<String> fi = first.getKeywords();
-                keywords.forEach(item -> fi.add(item));
+                List<String> resultKeywords = first.getKeywords();
+                keywords.forEach(item -> resultKeywords.add(item));
 
-                mongoDbObject = new MongoDbObject(convId, fi,first.getQuestions()+1);
+                HttpEntity<List<String>> entityAmazon = new HttpEntity<List<String>>(resultKeywords, headers);
+                ResponseEntity<ResponseObject> amazonResponse = restTemplate.exchange("http://localhost:8080/api/amazon/quantity", HttpMethod.POST, entityAmazon, ResponseObject.class);
+
+                mongoDbObject = new MongoDbObject(convId, resultKeywords,first.getQuestions()+1,amazonResponse.getBody().getData().asInt());
             }
             mongoObjRepo.save(mongoDbObject);
 
@@ -148,7 +151,7 @@ public class CentralController {
         if(assData.get("watsonData").asText().split("&")[1].equals("K")){
 
             MongoDbObject mongoDbObject = null;
-            List<String> fi = null;
+            List<String> resultKeywords = null;
             if(isNew){
                 JsonNode returnData = mapper.valueToTree("Zle");
 
@@ -156,18 +159,18 @@ public class CentralController {
             }
             else{
                 List<MongoDbObject> list =  this.mongoObjRepo.findAllByConvId(convId);
-                list.stream().sorted((object1, object2) -> object1.getQuestions() -object2.getQuestions());
+                Collections.sort(list);
                 MongoDbObject first =list.get(0);
 
-                fi = first.getKeywords();
-                if(fi.size()< 1 ){
+                resultKeywords = first.getKeywords();
+                if(resultKeywords.size()< 1 ){
                     JsonNode returnData = mapper.valueToTree("Zle");
 
                     return new ResponseEntity<>(ResponseObject.createSuccess(Notification.TEST_GET_SUCCESS, returnData), HttpStatus.OK);
                 }
             }
 
-            HttpEntity<List<String>> entityAmazon = new HttpEntity<List<String>>(fi, headers);
+            HttpEntity<List<String>> entityAmazon = new HttpEntity<List<String>>(resultKeywords, headers);
             ResponseEntity<ResponseObject> amazonResponse = restTemplate.exchange("http://localhost:8080/api/amazon", HttpMethod.POST, entityAmazon, ResponseObject.class);
 
             FrontObj response = new FrontObj();
@@ -189,13 +192,13 @@ public class CentralController {
             MongoDbObject mongoDbObject = null;
 
             if(isNew){
-                mongoDbObject = new MongoDbObject(convId,new ArrayList<String>(),0);
+                mongoDbObject = new MongoDbObject(convId,new ArrayList<String>(),0,0);
             }
             else{
                 List<MongoDbObject> list =  this.mongoObjRepo.findAllByConvId(convId);
-                list.stream().sorted((object1, object2) -> object1.getQuestions() -object2.getQuestions());
+                Collections.sort(list);
                 MongoDbObject first = this.mongoObjRepo.findAllByConvId(convId).get(0);
-                mongoDbObject = new MongoDbObject(convId,first.getKeywords(),first.getQuestions());
+                mongoDbObject = new MongoDbObject(convId,first.getKeywords(),first.getQuestions(),first.getTotalResults());
 
             }
 

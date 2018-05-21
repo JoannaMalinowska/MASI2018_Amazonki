@@ -76,7 +76,7 @@ public class CentralController {
             MongoDbObject mongoDbObject = null;
 
             if(isNew){
-                mongoDbObject = new MongoDbObject(convId,new ArrayList<String>(),1,0);
+                mongoDbObject = new MongoDbObject(convId,new ArrayList<String>(),1,0,0);
             }
             else{
                 List<MongoDbObject> list =  this.mongoObjRepo.findAllByConvId(convId);
@@ -86,7 +86,7 @@ public class CentralController {
                 HttpEntity<List<String>> entityAmazon = new HttpEntity<List<String>>(first.getKeywords(), headers);
                 ResponseEntity<ResponseObject> amazonResponse = restTemplate.exchange("http://localhost:8080/api/amazon/quantity", HttpMethod.POST, entityAmazon, ResponseObject.class);
 
-                mongoDbObject = new MongoDbObject(convId,first.getKeywords(),first.getQuestions()+1,amazonResponse.getBody().getData().asInt());
+                mongoDbObject = new MongoDbObject(convId,first.getKeywords(),first.getQuestions()+1,amazonResponse.getBody().getData().asInt(),first.getMisunderstoodQuestions());
 
 
             }
@@ -116,7 +116,7 @@ public class CentralController {
                 HttpEntity<List<String>> entityAmazon = new HttpEntity<List<String>>(keywords, headers);
                 ResponseEntity<ResponseObject> amazonResponse = restTemplate.exchange("http://localhost:8080/api/amazon/quantity", HttpMethod.POST, entityAmazon, ResponseObject.class);
 
-                mongoDbObject = new MongoDbObject(convId,keywords,1,amazonResponse.getBody().getData().asInt());
+                mongoDbObject = new MongoDbObject(convId,keywords,1,amazonResponse.getBody().getData().asInt(),0);
             }
             else{
                 List<MongoDbObject> list =  this.mongoObjRepo.findAllByConvId(convId);
@@ -129,7 +129,7 @@ public class CentralController {
                 HttpEntity<List<String>> entityAmazon = new HttpEntity<List<String>>(resultKeywords, headers);
                 ResponseEntity<ResponseObject> amazonResponse = restTemplate.exchange("http://localhost:8080/api/amazon/quantity", HttpMethod.POST, entityAmazon, ResponseObject.class);
 
-                mongoDbObject = new MongoDbObject(convId, resultKeywords,first.getQuestions()+1,amazonResponse.getBody().getData().asInt());
+                mongoDbObject = new MongoDbObject(convId, resultKeywords,first.getQuestions()+1,amazonResponse.getBody().getData().asInt(), first.getMisunderstoodQuestions());
             }
             mongoObjRepo.save(mongoDbObject);
 
@@ -192,13 +192,13 @@ public class CentralController {
             MongoDbObject mongoDbObject = null;
 
             if(isNew){
-                mongoDbObject = new MongoDbObject(convId,new ArrayList<String>(),0,0);
+                mongoDbObject = new MongoDbObject(convId,new ArrayList<String>(),0,0,1);
             }
             else{
                 List<MongoDbObject> list =  this.mongoObjRepo.findAllByConvId(convId);
                 Collections.sort(list);
                 MongoDbObject first = this.mongoObjRepo.findAllByConvId(convId).get(0);
-                mongoDbObject = new MongoDbObject(convId,first.getKeywords(),first.getQuestions(),first.getTotalResults());
+                mongoDbObject = new MongoDbObject(convId,first.getKeywords(),first.getQuestions(),first.getTotalResults(), first.getMisunderstoodQuestions()+1);
 
             }
 

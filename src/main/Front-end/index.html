@@ -46,7 +46,6 @@
 			<button name="send" id="send">Send</button>
 
 			<input type="hidden" name="hidden_string" id="hidden_string">
-			<input type="hidden" name="hidden_flag" id="hidden_flag" value="-1">
 		
 		</div>
 
@@ -85,37 +84,36 @@
 	$('.messages').on("DOMSubtreeModified",function(){
   	
   		var scan = $('#hidden_string').val();
-		var flag = $('#hidden_flag').val();
-		
-		 var obj = new Object();
-         obj.text = scan;
-         obj.con_id  = flag;
-		
-		
-		
   		$.ajax({
 			url: "http://localhost:8080/api/central",
 				method: "POST",
-				data: JSON.stringify(obj),
+				data:scan,
 				dataType: "json",
 				contentType: "application/json;charset=utf-8",
 				success:function(data)
 				{
-
-					console.log(data.data.con_id);
-					//ar answer_bot = JSON.stringify(data.data);
-					$('#hidden_flag').val(data.data.con_id);
-					//answer_bot = answer_bot.replace('"','');
-					//answer_bot = answer_bot.replace('"','');
-					var html_code_bot = '<div class="chat bot"><div class="user-photo"></div><p class="message1">'+data.data.text+'</p></div>';
-					$('.messages').off();
-					setTimeout(function(){
-    				$('.messages').append(html_code_bot);
-					scroll();
-					$("textarea").prop('disabled', false);
-					$("textarea").focus();
-					}, 1000);
+					console.log(data);
+					var answer_bot = JSON.stringify(data.data);
+					answer_bot = answer_bot.replace('"','');
+					answer_bot = answer_bot.replace('"','');
 					
+					var answer_bot2 = answer_bot.substring(0, 4);
+					if(answer_bot2 == "http"){
+						var html_code_bot = '<div class="chat bot"><div class="user-photo"></div><p class="message1"><a href="'+answer_bot+'" target="_blank">"Kliknij w ten link aby zobaczyć wyniki wyszukiwania :)"</a></p></div>';
+						$('.messages').off();
+    					$('.messages').append(html_code_bot);
+						scroll();
+						$("textarea").prop('disabled', false);
+						$("textarea").focus();
+
+					}else{
+						var html_code_bot = '<div class="chat bot"><div class="user-photo"></div><p class="message1">'+answer_bot+'</p></div>';
+						$('.messages').off();
+    					$('.messages').append(html_code_bot);
+						scroll();
+						$("textarea").prop('disabled', false);
+						$("textarea").focus();
+					}
 				
 				}
 

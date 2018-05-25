@@ -110,7 +110,7 @@
 					
 					var answer_bot2 = data.data.text.substring(0, 4);
 					if(answer_bot2 == "http"){
-						var html_code_bot = '<div class="chat bot"><div class="user-photo"></div><p class="message1"><a href="'+data.data.text+'" target="_blank">"Kliknij w ten link aby zobaczyć wyniki wyszukiwania :)"</a></p></div>';
+						var html_code_bot = '<div class="chat bot"><div class="user-photo"></div><p class="message1"><a href="'+data.data.text+'" target="_blank">"Click here to see the results."</a></p></div>';
 						$('.messages').off();
     					$('.messages').append(html_code_bot);
 						scroll();

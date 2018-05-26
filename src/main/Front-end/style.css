@@ -6,9 +6,12 @@
 	box-sizing: border-box;
 }
 
-/*tło - navy blue*/
+
 body, html{
-	background: #000080;
+	background-image: url(Thin-Art-fabric-bookshelf-backdrops-photography-background-library-backdrop-for-photo-studio-D-1489.jpg_640x640.jpg) ;	
+	
+	
+    
 }
 
 /*ustawienie okna czatu*/
@@ -16,10 +19,13 @@ body, html{
 	width: 500px;
 	min-width: 390px;
 	height: 600px;
-	background: #fff;
+	background-image: url(e02a63a5c4775e9a0497e5cc99ce91f5.jpg);
+	background-size: 100%;
 	padding: 25px;
 	margin: 20px auto;
-	box-shadow: 0 5px #ccc;
+	border: 3px solid black;
+    border-radius: 3px;
+	
 }
 
 .messages{
@@ -50,6 +56,12 @@ body, html{
 	height: 60px;
 	background: #ccc;
 	border-radius: 50%;
+	overflow: hidden;
+	border: 1.5px solid black;
+}
+
+.chat .user-photo img{
+	width: 100%
 }
 
 .chat .message1{
@@ -62,12 +74,17 @@ body, html{
 }
 
 .bot .message1{
-	background: #1ddced; 
+	background: #edc31d; 
+	border: 1.5px solid black;
+	color: black;
+	font-weight: bold;
+
 }
 
 .user .message1{
-	background: #000080;
+	background: #492b03;
 	order: -1;
+	border: 1.5px solid black;
 }
 
 .bottom{
@@ -85,6 +102,8 @@ body, html{
 	resize: none;
 	padding: 10px;
 	font-size: 15px;
+	border-radius: 5px;
+	border: 1.5px solid black;
 
 }
 
@@ -93,11 +112,19 @@ body, html{
 }
 
 .bottom button{
-	background: #000080;
+	background: #492b03;
 	color: #fff;
 	font-size: 20px;
 	padding: 14px 15px;
 	border: none;
 	margin: 0 15px;
 	border-radius: 5px;
+	border: 1.5px solid black;
 }
+
+.bottom button:hover{
+	background: #edc31d;
+	color: black;
+}
+
+

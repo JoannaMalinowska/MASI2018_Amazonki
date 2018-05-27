@@ -82,7 +82,7 @@ public class AssistantController {
 
         else {
 
-               ListLogsOptions Log1options = new ListLogsOptions.Builder(workspaceId).build();
+               ListLogsOptions Log1options = new ListLogsOptions.Builder(workspaceId).pageLimit(500).build();
 
                LogCollection Log1response = Assistantservice.listLogs(Log1options).execute();
                Context context = null;

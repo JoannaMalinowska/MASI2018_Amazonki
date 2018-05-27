@@ -3,17 +3,19 @@ package com.pai.webservice.model;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 
+import java.util.Date;
 import java.util.List;
 
 @Data
 public class MongoDbObject implements Comparable<MongoDbObject> {
 
-    public MongoDbObject(String convId, List<String> keywords, int questions, Integer totalResults, Integer misunderstoodQuestions) {
+    public MongoDbObject(String convId, List<String> keywords, int questions, Integer totalResults, Integer misunderstoodQuestions, int counter) {
         this.convId = convId;
         this.keywords = keywords;
         this.questions = questions;
         this.totalResults = totalResults;
         this.misunderstoodQuestions = misunderstoodQuestions;
+        this.counter = counter;
     }
     @Id
     private String id;
@@ -22,6 +24,7 @@ public class MongoDbObject implements Comparable<MongoDbObject> {
     private int questions;
     private Integer totalResults;
     private  Integer misunderstoodQuestions;
+    private int counter;
 
     public int getQuestions() {
         return questions;
@@ -63,8 +66,18 @@ public class MongoDbObject implements Comparable<MongoDbObject> {
         this.misunderstoodQuestions = misunderstoodQuestions;
     }
 
+    public int getCounter() {
+        return counter;
+    }
+
+    public void setDate(int counter) {
+        this.counter = counter;
+    }
+
     @Override
     public int compareTo(MongoDbObject o) {
-        return o.getTotalResults() - this.getTotalResults();
+        return o.getCounter() - this.getCounter();
     }
+
+
 }

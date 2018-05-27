@@ -13,6 +13,7 @@ public class MongoDbObject implements Comparable<MongoDbObject> {
         this.keywords = keywords;
         this.questions = questions;
         this.totalResults = totalResults;
+        this.misunderstoodQuestions = misunderstoodQuestions;
     }
     @Id
     private String id;

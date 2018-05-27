@@ -64,6 +64,7 @@ public class CentralController {
 
         String convId = watsonAssResponse.getBody().getData().get("con_id").asText();
 
+        //begin conversation
         if (assData.get("watsonData").asText().split("&")[1].equals("W")) {
 
 
@@ -83,11 +84,15 @@ public class CentralController {
                 Collections.sort(list);
                 MongoDbObject first = this.mongoObjRepo.findAllByConvId(convId).get(0);
 
-                HttpEntity<List<String>> entityAmazon = new HttpEntity<List<String>>(first.getKeywords(), headers);
-                ResponseEntity<ResponseObject> amazonResponse = restTemplate.exchange("http://localhost:8080/api/amazon/quantity", HttpMethod.POST, entityAmazon, ResponseObject.class);
+                if(first.getKeywords().size() > 0){
+                    HttpEntity<List<String>> entityAmazon = new HttpEntity<List<String>>(first.getKeywords(), headers);
+                    ResponseEntity<ResponseObject> amazonResponse = restTemplate.exchange("http://localhost:8080/api/amazon/quantity", HttpMethod.POST, entityAmazon, ResponseObject.class);
 
-                mongoDbObject = new MongoDbObject(convId,first.getKeywords(),first.getQuestions()+1,amazonResponse.getBody().getData().asInt(),first.getMisunderstoodQuestions());
-
+                    mongoDbObject = new MongoDbObject(convId,first.getKeywords(),first.getQuestions()+1,amazonResponse.getBody().getData().asInt(),first.getMisunderstoodQuestions());
+                }
+                else{
+                    mongoDbObject = new MongoDbObject(convId,new ArrayList<String>(),1,first.getTotalResults(),first.getMisunderstoodQuestions());
+                }
 
             }
             mongoObjRepo.save(mongoDbObject);
@@ -96,8 +101,7 @@ public class CentralController {
 
         }
 
-//gggg
-
+        //dialog
         if (assData.get("watsonData").asText().split("&")[1].equals("T")) {
             HttpEntity<String> entityWatson = new HttpEntity<String>(input.getText(), headers);
             ResponseEntity<ResponseObject> watsonResponse = restTemplate.exchange("http://localhost:8080/api/watson", HttpMethod.POST, entityWatson, ResponseObject.class);
@@ -126,15 +130,19 @@ public class CentralController {
                 List<String> resultKeywords = first.getKeywords();
                 keywords.forEach(item -> resultKeywords.add(item));
 
-                HttpEntity<List<String>> entityAmazon = new HttpEntity<List<String>>(resultKeywords, headers);
-                ResponseEntity<ResponseObject> amazonResponse = restTemplate.exchange("http://localhost:8080/api/amazon/quantity", HttpMethod.POST, entityAmazon, ResponseObject.class);
+                if(resultKeywords.size() > 0){
+                    HttpEntity<List<String>> entityAmazon = new HttpEntity<List<String>>(resultKeywords, headers);
+                    ResponseEntity<ResponseObject> amazonResponse = restTemplate.exchange("http://localhost:8080/api/amazon/quantity", HttpMethod.POST, entityAmazon, ResponseObject.class);
 
-                mongoDbObject = new MongoDbObject(convId, resultKeywords,first.getQuestions()+1,amazonResponse.getBody().getData().asInt(), first.getMisunderstoodQuestions());
+                    mongoDbObject = new MongoDbObject(convId, resultKeywords,first.getQuestions()+1,amazonResponse.getBody().getData().asInt(), first.getMisunderstoodQuestions());
+                }
+                else{
+                    mongoDbObject = new MongoDbObject(convId, new ArrayList<String>(),first.getQuestions()+1,first.getTotalResults(), first.getMisunderstoodQuestions());
+                }
+
+
             }
             mongoObjRepo.save(mongoDbObject);
-
-//            HttpEntity<List<String>> entityAmazon = new HttpEntity<List<String>>(keywords, headers);
-//            ResponseEntity<ResponseObject> amazonResponse = restTemplate.exchange("http://localhost:8080/api/amazon", HttpMethod.POST, entityAmazon, ResponseObject.class); To do ltr
 
             FrontObj response = new FrontObj();
             response.setCon_id(convId);
@@ -147,7 +155,7 @@ public class CentralController {
         }
 
 
-        //kkkkkkk
+        //end conversation
         if(assData.get("watsonData").asText().split("&")[1].equals("K")){
 
             MongoDbObject mongoDbObject = null;

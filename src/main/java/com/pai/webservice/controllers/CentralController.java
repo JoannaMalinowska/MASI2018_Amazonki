@@ -82,7 +82,7 @@ public class CentralController {
             else{
                 List<MongoDbObject> list =  this.mongoObjRepo.findAllByConvId(convId);
                 Collections.sort(list);
-                MongoDbObject first = this.mongoObjRepo.findAllByConvId(convId).get(0);
+                MongoDbObject first = list.get(0);
 
                 if(first.getKeywords().size() > 0){
                     HttpEntity<List<String>> entityAmazon = new HttpEntity<List<String>>(first.getKeywords(), headers);
@@ -205,7 +205,7 @@ public class CentralController {
             else{
                 List<MongoDbObject> list =  this.mongoObjRepo.findAllByConvId(convId);
                 Collections.sort(list);
-                MongoDbObject first = this.mongoObjRepo.findAllByConvId(convId).get(0);
+                MongoDbObject first = list.get(0);
                 mongoDbObject = new MongoDbObject(convId,first.getKeywords(),first.getQuestions(),first.getTotalResults(), first.getMisunderstoodQuestions()+1,first.getCounter()+1);
 
             }

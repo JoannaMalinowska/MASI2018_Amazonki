@@ -76,7 +76,7 @@ public class MongoDbObject implements Comparable<MongoDbObject> {
 
     @Override
     public int compareTo(MongoDbObject o) {
-        return o.getCounter() - this.getCounter();
+        return o.counter - this.counter;
     }
 
 

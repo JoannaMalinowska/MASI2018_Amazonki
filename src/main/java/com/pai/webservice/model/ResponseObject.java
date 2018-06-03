@@ -50,5 +50,27 @@ public class ResponseObject {
         return create(ERROR, _notification, _data);
     }
 
+    public JsonNode getData(){
+        return data;
+    }
 
+    public void setData(JsonNode data) {
+        this.data = data;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public String getNotification() {
+        return notification;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public void setNotification(String notification) {
+        this.notification = notification;
+    }
 }

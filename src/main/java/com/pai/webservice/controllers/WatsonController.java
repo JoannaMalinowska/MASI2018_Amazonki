@@ -3,6 +3,7 @@ package com.pai.webservice.controllers;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ibm.watson.developer_cloud.service.exception.ServiceResponseException;
 import com.pai.webservice.model.FrontObj;
 import com.pai.webservice.model.ResponseObject;
 import com.pai.webservice.notifications.Notification;
@@ -43,8 +44,7 @@ public class WatsonController {
     private AmazonResponseService amazonResponseService;
 
     @PostMapping(value = "")
-    public @ResponseBody
-    ResponseEntity processWatson(@Valid @RequestBody String input) {
+    public @ResponseBody ResponseEntity<ResponseObject> processWatson(@Valid @RequestBody String input) {
 
 //connect with Watson - Natural Language Understanding
         NaturalLanguageUnderstanding NLUservice = new NaturalLanguageUnderstanding(
@@ -67,15 +67,23 @@ public class WatsonController {
                 .build();
 
 //Analyze inputText in Watson - NLU
-        AnalysisResults NLUresponse = NLUservice
-                .analyze(parameters)
-                .execute();
+        AnalysisResults NLUresponse = null;
+        try {
+            System.out.println(parameters.toString() + ", , " + parameters.text() + ", " + parameters.features());
+            NLUresponse = NLUservice
+                    .analyze(parameters)
+                    .execute();
+        } catch (ServiceResponseException ex) {
+            System.out.println("Exception: " + ex.toString());
+            return new ResponseEntity<ResponseObject>(new ResponseObject("status", "notifcation"), HttpStatus.OK);
+        }
+
 
 
 
         JsonNode returnData = mapper.valueToTree(  NLUresponse.getKeywords());
 
-        return new ResponseEntity<>(ResponseObject.createSuccess(Notification.TEST_GET_SUCCESS,returnData), HttpStatus.OK);
+        return new ResponseEntity<ResponseObject>(ResponseObject.createSuccess(Notification.TEST_GET_SUCCESS,returnData), HttpStatus.OK);
 
     }
 

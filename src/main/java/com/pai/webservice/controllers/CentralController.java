@@ -39,7 +39,7 @@ public class CentralController {
 
         boolean isNew = false;
 
-        if(input.getCon_id().equals("-1")){
+        if(input.getCon_id() != null && input.getCon_id().equals("-1")){
             isNew = true;
         }
         else {
@@ -57,15 +57,42 @@ public class CentralController {
 
 
         HttpEntity<FrontObj> entityWatsonAss = new HttpEntity<FrontObj>(input, headers);
-        ResponseEntity<ResponseObject> watsonAssResponse = restTemplate.exchange("http://localhost:8080/api/watsonAst", HttpMethod.POST,entityWatsonAss,ResponseObject.class);
+        System.out.println(entityWatsonAss);
 
-        JsonNode assData = watsonAssResponse.getBody().getData().get("assistantAnswer");
+        ResponseEntity<ResponseObject> watsonAssResponse;
+        JsonNode assData;
+        String convId;
+        try {
+            watsonAssResponse = restTemplate.exchange("http://localhost:8080/api/watsonAst", HttpMethod.POST,entityWatsonAss,ResponseObject.class);
+            //System.out.println(watsonAssResponse);
+
+            ResponseObject aaa =  watsonAssResponse.getBody();
+            //assData = watsonAssResponse.getBody().getData().get("assistantAnswer");
+            convId = aaa.getData().get("con_id").asText();
+            assData = aaa.getData().get("assistantAnswer");
+
+            System.out.println(watsonAssResponse);
+            System.out.println(watsonAssResponse.getBody().getData());
+
+             //convId = watsonAssResponse.getBody().getData().get("con_id").asText();
+
+        } catch (Exception ex){ //Powinno byc RestClientException
+            //jesli nie dostaniemy potrzebnych danych to obsluga dalsza nie ma sensu
+            System.out.println("Excetion " + ex.toString());
+            ex.printStackTrace();
+            return new ResponseEntity<ResponseObject>(new ResponseObject("status", "notification"), HttpStatus.OK);
+        }
+       // if(watsonAssResponse.getBody() == null) {
+         //   return new ResponseEntity<ResponseObject>(new ResponseObject("status", "notification"), HttpStatus.OK);
+        //}
 
 
-        String convId = watsonAssResponse.getBody().getData().get("con_id").asText();
+
+        System.out.println(assData);
 
         //begin conversation
-        if (assData.get("watsonData").asText().split("&")[1].equals("W")) {
+        //Do przepisania na if - else if - else if - if
+        if (assData.size() > 0 && assData.get("watsonData") !=null && assData.get("watsonData").asText().contains("&") && assData.get("watsonData").asText().split("&")[1].equals("W")) {
 
 
             FrontObj response = new FrontObj();
@@ -102,7 +129,7 @@ public class CentralController {
         }
 
         //dialog
-        if (assData.get("watsonData").asText().split("&")[1].equals("T")) {
+        if (assData.size() > 0 && assData.get("watsonData") !=null && assData.get("watsonData").asText().contains("&") && assData.get("watsonData").asText().split("&")[1].equals("T")) {
             HttpEntity<String> entityWatson = new HttpEntity<String>(input.getText(), headers);
             ResponseEntity<ResponseObject> watsonResponse = restTemplate.exchange("http://localhost:8080/api/watson", HttpMethod.POST, entityWatson, ResponseObject.class);
 
@@ -156,7 +183,7 @@ public class CentralController {
 
 
         //end conversation
-        if(assData.get("watsonData").asText().split("&")[1].equals("K")){
+        if(assData.size() > 0 && assData.get("watsonData") !=null && assData.get("watsonData").asText().contains("&") && assData.get("watsonData").asText().split("&")[1].equals("K")){
 
             MongoDbObject mongoDbObject = null;
             List<String> resultKeywords = null;

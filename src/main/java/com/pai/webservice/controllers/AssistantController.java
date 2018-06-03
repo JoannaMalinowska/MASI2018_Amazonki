@@ -34,7 +34,7 @@ public class AssistantController {
 
     @PostMapping(value = "")
     public @ResponseBody
-    ResponseEntity processWatson(@Valid @RequestBody FrontObj inputFront) {
+    ResponseEntity<ResponseObject> processWatson(@Valid @RequestBody FrontObj inputFront) {
 
 
         String conversationID = inputFront.getCon_id();
@@ -103,20 +103,27 @@ public class AssistantController {
                     .input(new InputData.Builder(inputFront.getText()).build())
                     .context(context) // output context from the first message
                     .build();
+               System.out.println("workspaceId " + workspaceId + " inputFront " + inputFront.getText() + " context " + context);
 
             MessageResponse secondResponse = Assistantservice.message(secondMessageOptions).execute();
 
-            AssistantAnswer result = new AssistantAnswer(secondResponse.getOutput().getText().get(0).replace("[", "").replace("]", ""));
+            //if(secondResponse.getOutput() !=null && secondResponse.getOutput().getText() != null && secondResponse.getOutput().getText().size() < 0) {
+                AssistantAnswer result = new AssistantAnswer(secondResponse.getOutput().getText().get(0).replace("[", "").replace("]", ""));
 
-               WatsonConv respone  = new WatsonConv();
-               respone.setCon_id(secondResponse.getContext().getConversationId());
-               respone.setAssistantAnswer(result);
+                WatsonConv respone  = new WatsonConv();
+                respone.setCon_id(secondResponse.getContext().getConversationId());
+                respone.setAssistantAnswer(result);
 
-            returnData = mapper.valueToTree(respone);
+                returnData = mapper.valueToTree(respone);
+            //}
+            // else {
+            //    new ResponseEntity<ResponseObject>(new ResponseObject("status","notification"), HttpStatus.OK);
+
+            //}
 
         }
 
-        return new ResponseEntity<>(ResponseObject.createSuccess(Notification.TEST_GET_SUCCESS,returnData), HttpStatus.OK);
+        return new ResponseEntity<ResponseObject>(ResponseObject.createSuccess(Notification.TEST_GET_SUCCESS,returnData), HttpStatus.OK);
     }
 
 }

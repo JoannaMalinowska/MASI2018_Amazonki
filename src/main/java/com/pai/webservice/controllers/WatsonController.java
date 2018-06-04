@@ -9,9 +9,12 @@ import com.pai.webservice.model.ResponseObject;
 import com.pai.webservice.notifications.Notification;
 import com.pai.webservice.service.AmazonResponseService;
 import com.pai.webservice.service.AmazonService;
+import com.pai.webservice.service.CentralService;
+import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.*;
 import com.ibm.watson.developer_cloud.assistant.v1.Assistant;
 import com.ibm.watson.developer_cloud.assistant.v1.model.CreateWorkspaceOptions;
@@ -43,17 +46,19 @@ public class WatsonController {
     @Autowired
     private AmazonResponseService amazonResponseService;
 
+
+    @Autowired
+    private CentralService centralService;
+
     @PostMapping(value = "")
+    @Async
     public @ResponseBody ResponseEntity<ResponseObject> processWatson(@Valid @RequestBody String input) {
 
-//connect with Watson - Natural Language Understanding
         NaturalLanguageUnderstanding NLUservice = new NaturalLanguageUnderstanding(
                 "2018-03-16",
                 "219783e0-f7c9-47f4-9c30-4baf3eaa424c",
                 "t8TsyDcM6C8W"
         );
-
-//Set analyze options
         KeywordsOptions keywordsOptions = new KeywordsOptions.Builder()
                 .build();
 
@@ -61,27 +66,27 @@ public class WatsonController {
                 .keywords(keywordsOptions)
                 .build();
 
+
         AnalyzeOptions parameters = new AnalyzeOptions.Builder()
                 .text(input)
                 .features(features)
                 .build();
 
-//Analyze inputText in Watson - NLU
-        AnalysisResults NLUresponse = null;
+        AnalysisResults nluResponse = null;
+        JsonNode returnData = null;
         try {
             System.out.println(parameters.toString() + ", , " + parameters.text() + ", " + parameters.features());
-            NLUresponse = NLUservice
+
+
+            nluResponse = NLUservice
                     .analyze(parameters)
                     .execute();
+            returnData = mapper.valueToTree(  nluResponse.getKeywords());
         } catch (ServiceResponseException ex) {
-            System.out.println("Exception: " + ex.toString());
-            return new ResponseEntity<ResponseObject>(new ResponseObject("status", "notifcation"), HttpStatus.OK);
+            JSONObject obj = new JSONObject();
+            obj.put("text", input);
+            returnData = mapper.valueToTree(new ArrayList<String>(){{add(obj.toJSONString());}});
         }
-
-
-
-
-        JsonNode returnData = mapper.valueToTree(  NLUresponse.getKeywords());
 
         return new ResponseEntity<ResponseObject>(ResponseObject.createSuccess(Notification.TEST_GET_SUCCESS,returnData), HttpStatus.OK);
 

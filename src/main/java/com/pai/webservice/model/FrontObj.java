@@ -5,6 +5,14 @@ public class FrontObj {
     private String text;
     private String con_id;
 
+    public FrontObj(String text, String con_id) {
+        this.text = text;
+        this.con_id = con_id;
+    }
+
+    public FrontObj() {
+    }
+
     public String getText() {
         return text;
     }

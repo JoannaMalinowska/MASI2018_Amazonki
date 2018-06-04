@@ -10,9 +10,11 @@ import com.pai.webservice.model.WatsonConv;
 import com.pai.webservice.notifications.Notification;
 import com.pai.webservice.service.AmazonResponseService;
 import com.pai.webservice.service.AmazonService;
+import com.pai.webservice.service.CentralService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.*;
 import com.ibm.watson.developer_cloud.assistant.v1.Assistant;
 
@@ -32,7 +34,11 @@ public class AssistantController {
     @Autowired
     private AmazonResponseService amazonResponseService;
 
+    @Autowired
+    private CentralService centralService;
+
     @PostMapping(value = "")
+    @Async
     public @ResponseBody
     ResponseEntity<ResponseObject> processWatson(@Valid @RequestBody FrontObj inputFront) {
 
@@ -50,10 +56,22 @@ public class AssistantController {
                 new ListLogsOptions.Builder(workspaceId).
                         build();
 
+        AssistantAnswer result=null;
+        LogCollection Log3response = null;
+        try{
+            Log3response = Assistantservice.listLogs(Log3options).execute();
+        }
+        catch(Exception e){
+            result = new AssistantAnswer("To many requests. Try again for 20 minutes.&G");
+            WatsonConv respone  = new WatsonConv();
+            respone.setAssistantAnswer(result);
+            respone.setCon_id(conversationID);
+            return new ResponseEntity<ResponseObject>(ResponseObject.createSuccess(Notification.TEST_GET_SUCCESS,mapper.valueToTree(respone)), HttpStatus.BAD_REQUEST);
+        }
 
-        LogCollection Log3response = Assistantservice.listLogs(Log3options).execute();
 
         JsonNode returnData = null;
+
 
            if (conversationID.equals("-1")) {
 
@@ -67,11 +85,7 @@ public class AssistantController {
 
             List<String> data = AssistantResponse.getOutput().getNodesVisited();
 
-            //ListLogsOptions Log2options = new ListLogsOptions.Builder(workspaceId).build();
-
-            //LogCollection Log2response = Assistantservice.listLogs(Log2options).execute();
-
-            AssistantAnswer result = new AssistantAnswer(AssistantResponse.getOutput().getText().get(0).replace("[", "").replace("]", ""));
+            result = new AssistantAnswer(AssistantResponse.getOutput().getText().get(0).replace("[", "").replace("]", ""));
 
             WatsonConv respone  = new WatsonConv();
             respone.setCon_id(AssistantResponse.getContext().getConversationId());
@@ -103,23 +117,26 @@ public class AssistantController {
                     .input(new InputData.Builder(inputFront.getText()).build())
                     .context(context) // output context from the first message
                     .build();
-               System.out.println("workspaceId " + workspaceId + " inputFront " + inputFront.getText() + " context " + context);
 
             MessageResponse secondResponse = Assistantservice.message(secondMessageOptions).execute();
 
-            //if(secondResponse.getOutput() !=null && secondResponse.getOutput().getText() != null && secondResponse.getOutput().getText().size() < 0) {
-                AssistantAnswer result = new AssistantAnswer(secondResponse.getOutput().getText().get(0).replace("[", "").replace("]", ""));
 
-                WatsonConv respone  = new WatsonConv();
-                respone.setCon_id(secondResponse.getContext().getConversationId());
-                respone.setAssistantAnswer(result);
+               WatsonConv respone  = new WatsonConv();
+               try {
+                   String test = secondResponse.getOutput().getText().get(0);
+                   result = new AssistantAnswer(secondResponse.getOutput().getText().get(0).replace("[", "").replace("]", ""));
+
+                   respone.setCon_id(secondResponse.getContext().getConversationId());
+
+               }
+
+               catch(Exception e){
+                   result = new AssistantAnswer("I didn't understand.&G");
+                   respone.setCon_id(conversationID);
+               }
+               respone.setAssistantAnswer(result);
 
                 returnData = mapper.valueToTree(respone);
-            //}
-            // else {
-            //    new ResponseEntity<ResponseObject>(new ResponseObject("status","notification"), HttpStatus.OK);
-
-            //}
 
         }
 

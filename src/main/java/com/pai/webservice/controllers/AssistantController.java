@@ -62,7 +62,7 @@ public class AssistantController {
             Log3response = Assistantservice.listLogs(Log3options).execute();
         }
         catch(Exception e){
-            result = new AssistantAnswer("To many requests. Try again for 20 minutes.&G");
+            result = new AssistantAnswer("To many requests. Try again after 20 minutes.&G");
             WatsonConv respone  = new WatsonConv();
             respone.setAssistantAnswer(result);
             respone.setCon_id(conversationID);
@@ -78,7 +78,7 @@ public class AssistantController {
             InputData input = new InputData.Builder(inputFront.getText()).build();
 
             MessageOptions options = new MessageOptions.Builder(workspaceId)
-                    .input(input)
+                    .context(new Context()).input(input)
                     .build();
 
             MessageResponse AssistantResponse = Assistantservice.message(options).execute();
@@ -115,8 +115,12 @@ public class AssistantController {
             MessageOptions secondMessageOptions = new MessageOptions.Builder()
                     .workspaceId(workspaceId)
                     .input(new InputData.Builder(inputFront.getText()).build())
-                    .context(context) // output context from the first message
+                    .context(new Context())
+                    //.context(context) // output context from the first message
                     .build();
+
+               secondMessageOptions.context().setConversationId(conversationID);
+               secondMessageOptions.context().setSystem(context.getSystem());
 
             MessageResponse secondResponse = Assistantservice.message(secondMessageOptions).execute();
 

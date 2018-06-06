@@ -56,8 +56,10 @@ public class WatsonController {
 
         NaturalLanguageUnderstanding NLUservice = new NaturalLanguageUnderstanding(
                 "2018-03-16",
-                "219783e0-f7c9-47f4-9c30-4baf3eaa424c",
-                "t8TsyDcM6C8W"
+                "0f2064df-e2a9-4605-a74b-f3c7607a22e9",
+                //"219783e0-f7c9-47f4-9c30-4baf3eaa424c",
+                "yWrIIsBmlKXQ"
+                //"t8TsyDcM6C8W"
         );
         KeywordsOptions keywordsOptions = new KeywordsOptions.Builder()
                 .build();

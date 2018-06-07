@@ -52,26 +52,8 @@ public class AssistantController {
 
         String workspaceId = "bb7f5b28-50f0-49ae-a454-df7799de94a3";
 
-        ListLogsOptions Log3options =
-                new ListLogsOptions.Builder(workspaceId).
-                        build();
-
         AssistantAnswer result=null;
-        LogCollection Log3response = null;
-        try{
-            Log3response = Assistantservice.listLogs(Log3options).execute();
-        }
-        catch(Exception e){
-            result = new AssistantAnswer("To many requests. Try again after 20 minutes.&G");
-            WatsonConv respone  = new WatsonConv();
-            respone.setAssistantAnswer(result);
-            respone.setCon_id(conversationID);
-            return new ResponseEntity<ResponseObject>(ResponseObject.createSuccess(Notification.TEST_GET_SUCCESS,mapper.valueToTree(respone)), HttpStatus.BAD_REQUEST);
-        }
-
-
         JsonNode returnData = null;
-
 
            if (conversationID.equals("-1")) {
 
@@ -96,12 +78,12 @@ public class AssistantController {
 
         else {
 
-               ListLogsOptions Log1options = new ListLogsOptions.Builder(workspaceId).pageLimit(500).build();
+               ListLogsOptions Log1options = new ListLogsOptions.Builder(workspaceId).pageLimit(1000).build();
 
                LogCollection Log1response = Assistantservice.listLogs(Log1options).execute();
                Context context = null;
 
-               for(int i=0; i< Log1response.getLogs().size();i++)
+               for(int i = Log1response.getLogs().size() - 1 ; i>0; i--)
                {
                    LogExport logExport = Log1response.getLogs().get(i);
                    context =  logExport.getResponse().getContext();

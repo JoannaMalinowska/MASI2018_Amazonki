@@ -1,5 +1,6 @@
 package com.pai.webservice.model;
 
+import com.ibm.watson.developer_cloud.assistant.v1.model.SystemResponse;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 
@@ -9,12 +10,13 @@ import java.util.List;
 @Data
 public class MongoDbObject implements Comparable<MongoDbObject> {
 
-    public MongoDbObject(String convId, List<String> keywords, int questions, Integer totalResults, Integer misunderstoodQuestions, int counter) {
+    public MongoDbObject(String convId, List<String> keywords, int questions, Integer totalResults, Integer misunderstoodQuestions, int counter, SystemResponse context) {
         this.convId = convId;
         this.keywords = keywords;
         this.questions = questions;
         this.totalResults = totalResults;
         this.misunderstoodQuestions = misunderstoodQuestions;
+        this.context = context;
         this.counter = counter;
     }
     @Id
@@ -24,6 +26,7 @@ public class MongoDbObject implements Comparable<MongoDbObject> {
     private int questions;
     private Integer totalResults;
     private  Integer misunderstoodQuestions;
+    private SystemResponse context;
     private int counter;
 
     public int getQuestions() {
@@ -72,6 +75,14 @@ public class MongoDbObject implements Comparable<MongoDbObject> {
 
     public void setDate(int counter) {
         this.counter = counter;
+    }
+
+    public SystemResponse getContext() {
+        return context;
+    }
+
+    public void setContext(SystemResponse context) {
+        this.context = context;
     }
 
     @Override

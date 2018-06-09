@@ -3,6 +3,7 @@ package com.pai.webservice.controllers;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonObject;
 import com.ibm.watson.developer_cloud.service.exception.ServiceResponseException;
 import com.pai.webservice.model.FrontObj;
 import com.pai.webservice.model.ResponseObject;
@@ -83,11 +84,13 @@ public class WatsonController {
             nluResponse = NLUservice
                     .analyze(parameters)
                     .execute();
-            returnData = mapper.valueToTree(  nluResponse.getKeywords());
+            JSONObject obj = new JSONObject();
+            obj.put("text", nluResponse.getKeywords().get(0).getText());
+            returnData = mapper.valueToTree(  new ArrayList<JSONObject>(){{add(obj);}});
         } catch (ServiceResponseException ex) {
             JSONObject obj = new JSONObject();
             obj.put("text", input);
-            returnData = mapper.valueToTree(new ArrayList<String>(){{add(obj.toJSONString());}});
+            returnData = mapper.valueToTree(new ArrayList<JSONObject>(){{add(obj);}});
         }
 
         return new ResponseEntity<ResponseObject>(ResponseObject.createSuccess(Notification.TEST_GET_SUCCESS,returnData), HttpStatus.OK);

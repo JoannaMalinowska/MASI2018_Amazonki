@@ -3,11 +3,9 @@ package com.pai.webservice.controllers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ibm.watson.developer_cloud.assistant.v1.model.*;
-import com.pai.webservice.model.AssistantAnswer;
-import com.pai.webservice.model.FrontObj;
-import com.pai.webservice.model.ResponseObject;
-import com.pai.webservice.model.WatsonConv;
+import com.pai.webservice.model.*;
 import com.pai.webservice.notifications.Notification;
+import com.pai.webservice.repository.IMongoObjRepo;
 import com.pai.webservice.service.AmazonResponseService;
 import com.pai.webservice.service.AmazonService;
 import com.pai.webservice.service.CentralService;
@@ -19,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import com.ibm.watson.developer_cloud.assistant.v1.Assistant;
 
 import javax.validation.Valid;
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -37,6 +36,9 @@ public class AssistantController {
     @Autowired
     private CentralService centralService;
 
+    @Autowired
+    private IMongoObjRepo mongoObjRepo;
+
     @PostMapping(value = "")
     @Async
     public @ResponseBody
@@ -44,7 +46,6 @@ public class AssistantController {
 
 
         String conversationID = inputFront.getCon_id();
-
 
         //connect with Watson - Assistant
         Assistant Assistantservice = new Assistant("2018-02-16");
@@ -73,52 +74,58 @@ public class AssistantController {
             respone.setCon_id(AssistantResponse.getContext().getConversationId());
             respone.setAssistantAnswer(result);
 
+            respone.setSystemResponse(AssistantResponse.getContext().getSystem());
+
             returnData = mapper.valueToTree(respone);
         }
 
         else {
 
-               ListLogsOptions Log1options = new ListLogsOptions.Builder(workspaceId).pageLimit(1000).build();
+//               ListLogsOptions Log1options = new ListLogsOptions.Builder(workspaceId).pageLimit(1000).build();
+//
+//               LogCollection Log1response = Assistantservice.listLogs(Log1options).execute();
+//               Context context = null;
 
-               LogCollection Log1response = Assistantservice.listLogs(Log1options).execute();
-               Context context = null;
+//               for(int i = Log1response.getLogs().size() - 1 ; i>0; i--)
+//               {
+//                   LogExport logExport = Log1response.getLogs().get(i);
+//                   context =  logExport.getResponse().getContext();
+//                   String watsonConversationId =  context.getConversationId();
+//                   if(watsonConversationId.equals(conversationID))
+//                   {
+//                       break;
+//                   }
+//               }
 
-               for(int i = Log1response.getLogs().size() - 1 ; i>0; i--)
-               {
-                   LogExport logExport = Log1response.getLogs().get(i);
-                   context =  logExport.getResponse().getContext();
-                   String watsonConversationId =  context.getConversationId();
-                   if(watsonConversationId.equals(conversationID))
-                   {
-                       break;
-                   }
-               }
+           List<MongoDbObject> list = this.mongoObjRepo.findAllByConvId(conversationID);
+           Collections.sort(list);
+           MongoDbObject first = list.get(0);
 
             MessageOptions secondMessageOptions = new MessageOptions.Builder()
                     .workspaceId(workspaceId)
                     .input(new InputData.Builder(inputFront.getText()).build())
                     .context(new Context())
-                    //.context(context) // output context from the first message
                     .build();
 
-               secondMessageOptions.context().setConversationId(conversationID);
-               secondMessageOptions.context().setSystem(context.getSystem());
+           secondMessageOptions.context().setConversationId(conversationID);
+           secondMessageOptions.context().setSystem(first.getContext());
 
             MessageResponse secondResponse = Assistantservice.message(secondMessageOptions).execute();
 
 
                WatsonConv respone  = new WatsonConv();
                try {
-                   String test = secondResponse.getOutput().getText().get(0);
                    result = new AssistantAnswer(secondResponse.getOutput().getText().get(0).replace("[", "").replace("]", ""));
 
                    respone.setCon_id(secondResponse.getContext().getConversationId());
+                   respone.setSystemResponse(secondResponse.getContext().getSystem());
 
                }
 
                catch(Exception e){
                    result = new AssistantAnswer("I didn't understand.&G");
                    respone.setCon_id(conversationID);
+                   respone.setSystemResponse(secondResponse.getContext().getSystem());
                }
                respone.setAssistantAnswer(result);
 

@@ -2,6 +2,7 @@ package com.pai.webservice.controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ibm.watson.developer_cloud.assistant.v1.model.SystemResponse;
 import com.pai.webservice.model.FrontObj;
 import com.pai.webservice.model.MongoDbObject;
 import com.pai.webservice.model.ResponseObject;
@@ -64,13 +65,18 @@ public class CentralController {
 
         ResponseEntity<ResponseObject> watsonAssResponse;
         JsonNode assData;
+        JsonNode contextData;
         String convId;
+        SystemResponse context;
+
         try {
             watsonAssResponse = restTemplate.exchange("http://localhost:8080/api/watsonAst", HttpMethod.POST,entityWatsonAss,ResponseObject.class);
 
             ResponseObject watsonResponse =  watsonAssResponse.getBody();
             convId = watsonResponse.getData().get("con_id").asText();
             assData = watsonResponse.getData().get("assistantAnswer");
+            contextData = watsonResponse.getData().get("systemResponse");
+            context = mapper.treeToValue(contextData, SystemResponse.class);
 
 
         } catch (Exception ex){
@@ -83,7 +89,7 @@ public class CentralController {
         //welcome
         if (assData.size() > 0 && assData.get("watsonData") !=null && assData.get("watsonData").asText().contains("&") && assData.get("watsonData").asText().split("&")[1].equals("W")) {
 
-            MongoDbObject mongoDbObject = this.centralService.prepareMongoObjInWelcome(isNew, convId);
+            MongoDbObject mongoDbObject = this.centralService.prepareMongoObjInWelcome(isNew, convId, context);
             mongoObjRepo.save(mongoDbObject);
             return new ResponseEntity<>(ResponseObject.createSuccess(Notification.TEST_GET_SUCCESS, mapper.valueToTree(this.centralService.createWatsonResponse(assData, convId))), HttpStatus.OK);
         }
@@ -92,7 +98,7 @@ public class CentralController {
         if (assData.size() > 0 && assData.get("watsonData") !=null && assData.get("watsonData").asText().contains("&") && assData.get("watsonData").asText().split("&")[1].equals("T")) {
 
             List<String> keywords = this.centralService.getKeywordsFromWatson(input);
-            MongoDbObject mongoDbObject = this.centralService.prepareMongoObjInDialog(isNew, keywords, convId);
+            MongoDbObject mongoDbObject = this.centralService.prepareMongoObjInDialog(isNew, keywords, convId, context);
             mongoObjRepo.save(mongoDbObject);
             return new ResponseEntity<>(ResponseObject.createSuccess(Notification.TEST_GET_SUCCESS, mapper.valueToTree(this.centralService.createWatsonResponse(assData, convId))), HttpStatus.OK);
         }
@@ -125,7 +131,7 @@ public class CentralController {
 
         //misunderstanding
         else {
-            MongoDbObject mongoDbObject = this.centralService.prepareMongoObjForMisunderstanding(isNew, convId);
+            MongoDbObject mongoDbObject = this.centralService.prepareMongoObjForMisunderstanding(isNew, convId, context);
 
             mongoObjRepo.save(mongoDbObject);
             return new ResponseEntity<>(ResponseObject.createSuccess(Notification.TEST_GET_SUCCESS, mapper.valueToTree(this.centralService.createWatsonResponse(assData, convId))), HttpStatus.OK);

@@ -99,7 +99,7 @@ public class CentralService implements ICentralService {
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         if(isNew){
-            mongoDbObject = new MongoDbObject(convId,new ArrayList<String>(),1,0,0, 1, contextData);
+            mongoDbObject = new MongoDbObject(convId,new ArrayList<String>(),1,0,0, 1, contextData,0);
         }
         else{
             MongoDbObject first = this.getLastObjectFromMongo(convId);
@@ -108,10 +108,13 @@ public class CentralService implements ICentralService {
                 HttpEntity<List<String>> entityAmazon = new HttpEntity<List<String>>(first.getKeywords(), headers);
                 ResponseEntity<ResponseObject> amazonResponse = restTemplate.exchange("http://localhost:8080/api/amazon/quantity", HttpMethod.POST, entityAmazon, ResponseObject.class);
 
-                mongoDbObject = new MongoDbObject(convId,first.getKeywords(),first.getQuestions()+1,amazonResponse.getBody().getData().asInt(),first.getMisunderstoodQuestions(), first.getCounter()+1, contextData);
+                double reduction = (double)((first.getTotalResults()-amazonResponse.getBody().getData().asInt())/(first.getTotalResults()*1.0))*100;
+                reduction = Math.round(reduction * 100.0) / 100.0;
+                mongoDbObject = new MongoDbObject(convId,first.getKeywords(),first.getQuestions()+1,amazonResponse.getBody().getData().asInt(),first.getMisunderstoodQuestions(), first.getCounter()+1, contextData,reduction);
             }
             else{
-                mongoDbObject = new MongoDbObject(convId,new ArrayList<String>(),1,first.getTotalResults(),first.getMisunderstoodQuestions(), first.getCounter()+1, contextData);
+
+                mongoDbObject = new MongoDbObject(convId,new ArrayList<String>(),1,first.getTotalResults(),first.getMisunderstoodQuestions(), first.getCounter()+1, contextData,0);
             }
 
         }
@@ -128,7 +131,8 @@ public class CentralService implements ICentralService {
             HttpEntity<List<String>> entityAmazon = new HttpEntity<List<String>>(keywords, headers);
             ResponseEntity<ResponseObject> amazonResponse = restTemplate.exchange("http://localhost:8080/api/amazon/quantity", HttpMethod.POST, entityAmazon, ResponseObject.class);
 
-            mongoDbObject = new MongoDbObject(convId,keywords,1,amazonResponse.getBody().getData().asInt(),0, 1, context);
+
+            mongoDbObject = new MongoDbObject(convId,keywords,1,amazonResponse.getBody().getData().asInt(),0, 1, context,0);
         }
         else{
             MongoDbObject first = this.getLastObjectFromMongo(convId);
@@ -140,10 +144,13 @@ public class CentralService implements ICentralService {
                 HttpEntity<List<String>> entityAmazon = new HttpEntity<List<String>>(resultKeywords, headers);
                 ResponseEntity<ResponseObject> amazonResponse = restTemplate.exchange("http://localhost:8080/api/amazon/quantity", HttpMethod.POST, entityAmazon, ResponseObject.class);
 
-                mongoDbObject = new MongoDbObject(convId, resultKeywords,first.getQuestions()+1,amazonResponse.getBody().getData().asInt(), first.getMisunderstoodQuestions(), first.getCounter()+1, context);
+                double reduction = (double)((first.getTotalResults()-amazonResponse.getBody().getData().asInt())/(first.getTotalResults()*1.0))*100;
+                reduction = Math.round(reduction * 100.0) / 100.0;
+
+                mongoDbObject = new MongoDbObject(convId, resultKeywords,first.getQuestions()+1,amazonResponse.getBody().getData().asInt(), first.getMisunderstoodQuestions(), first.getCounter()+1, context,reduction);
             }
             else{
-                mongoDbObject = new MongoDbObject(convId, new ArrayList<String>(),first.getQuestions()+1,first.getTotalResults(), first.getMisunderstoodQuestions(), first.getCounter()+1, context);
+                mongoDbObject = new MongoDbObject(convId, new ArrayList<String>(),first.getQuestions()+1,first.getTotalResults(), first.getMisunderstoodQuestions(), first.getCounter()+1, context, 0);
             }
         }
         return mongoDbObject;
@@ -153,11 +160,11 @@ public class CentralService implements ICentralService {
     public MongoDbObject prepareMongoObjForMisunderstanding(boolean isNew, String convId, SystemResponse context) {
         MongoDbObject mongoDbObject = null;
         if(isNew){
-            mongoDbObject = new MongoDbObject(convId,new ArrayList<String>(),0,0,1, 1, context);
+            mongoDbObject = new MongoDbObject(convId,new ArrayList<String>(),0,0,1, 1, context, 0);
         }
         else{
             MongoDbObject first = this.getLastObjectFromMongo(convId);
-            mongoDbObject = new MongoDbObject(convId,first.getKeywords(),first.getQuestions(),first.getTotalResults(), first.getMisunderstoodQuestions()+1,first.getCounter()+1, context);
+            mongoDbObject = new MongoDbObject(convId,first.getKeywords(),first.getQuestions(),first.getTotalResults(), first.getMisunderstoodQuestions()+1,first.getCounter()+1, context, 0);
 
         }
         return  mongoDbObject;

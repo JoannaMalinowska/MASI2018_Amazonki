@@ -10,7 +10,7 @@ import java.util.List;
 @Data
 public class MongoDbObject implements Comparable<MongoDbObject> {
 
-    public MongoDbObject(String convId, List<String> keywords, int questions, Integer totalResults, Integer misunderstoodQuestions, int counter, SystemResponse context) {
+    public MongoDbObject(String convId, List<String> keywords, int questions, Integer totalResults, Integer misunderstoodQuestions, int counter, SystemResponse context, double reduction) {
         this.convId = convId;
         this.keywords = keywords;
         this.questions = questions;
@@ -18,6 +18,7 @@ public class MongoDbObject implements Comparable<MongoDbObject> {
         this.misunderstoodQuestions = misunderstoodQuestions;
         this.context = context;
         this.counter = counter;
+        this.reduction = reduction;
     }
     @Id
     private String id;
@@ -27,6 +28,7 @@ public class MongoDbObject implements Comparable<MongoDbObject> {
     private Integer totalResults;
     private  Integer misunderstoodQuestions;
     private SystemResponse context;
+    private double reduction;
     private int counter;
 
     public int getQuestions() {
@@ -83,6 +85,14 @@ public class MongoDbObject implements Comparable<MongoDbObject> {
 
     public void setContext(SystemResponse context) {
         this.context = context;
+    }
+
+    public double getReduction() {
+        return reduction;
+    }
+
+    public void setReduction(double reduction) {
+        this.reduction = reduction;
     }
 
     @Override

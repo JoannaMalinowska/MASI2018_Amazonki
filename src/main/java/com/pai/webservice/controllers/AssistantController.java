@@ -81,22 +81,6 @@ public class AssistantController {
 
         else {
 
-//               ListLogsOptions Log1options = new ListLogsOptions.Builder(workspaceId).pageLimit(1000).build();
-//
-//               LogCollection Log1response = Assistantservice.listLogs(Log1options).execute();
-//               Context context = null;
-
-//               for(int i = Log1response.getLogs().size() - 1 ; i>0; i--)
-//               {
-//                   LogExport logExport = Log1response.getLogs().get(i);
-//                   context =  logExport.getResponse().getContext();
-//                   String watsonConversationId =  context.getConversationId();
-//                   if(watsonConversationId.equals(conversationID))
-//                   {
-//                       break;
-//                   }
-//               }
-
            List<MongoDbObject> list = this.mongoObjRepo.findAllByConvId(conversationID);
            Collections.sort(list);
            MongoDbObject first = list.get(0);

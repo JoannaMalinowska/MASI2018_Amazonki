@@ -5,14 +5,14 @@
 	<meta charset="utf-8"/>
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	
+
 	<title>Amazon chatbox</title>
 
 	<link rel="stylesheet" type="text/css" href="style.css">
 	<link rel="stylesheet" type="text/css" href="modal.css">
-	
+
 	<script type="text/javascript" src="jquery.min.js"></script>
-	
+
 </head>
 
 <body>
@@ -37,15 +37,15 @@
 			<input type="hidden" name="hidden_string" id="hidden_string">
 			<input type="hidden" name="hidden_flag" id="hidden_flag" value="-1">
 
-			
-		
+
+
 		</div>
 		<br />
-		<button class="rate" name="rate" id="rate">Take a moment and rate me!!!</button>
+		<button class="rate" name="rate"  hidden="true" id="rate">Take a moment and rate me!!!</button>
 
 	</div>
-			
-			
+
+
 </body>
 </html>
 
@@ -60,7 +60,7 @@
 				<div class="container">
 				<p class="p5">USABILITY:</p>
 				<br />
-				
+
 				<form id="ratingsForm">
 						<div class="stars">
 							<input type="radio" name="star" class="star-1" id="star-1" value="1" />
@@ -86,7 +86,7 @@
 							<span></span>
 						</div>
 					</form>
-					  
+
 				<br />
 
 				<p class="p5">EFFECTIVENESS: </p>
@@ -119,11 +119,11 @@
 					</form>
 			</div>
 			</div>
-					
-			<div class="modal-footer">	
+
+			<div class="modal-footer">
 				<br /><br />
-				<button type="button" class="rateBtn"  id="rateBtn"> Rate me!!</button>
-			</div>		
+				<button type="button" class="rateBtn" id="rateBtn"> Rate me!!</button>
+			</div>
 	</div>
 </div>
 
@@ -132,7 +132,7 @@
 
 	$('#send').on('click', function(){
 
-		
+
 		var scan = document.getElementById("textarea").value;
 
 		if(scan == ""){
@@ -141,30 +141,30 @@
 
 		var html_code_user = '<div class="chat user"><div class="user-photo"><img src="user-512.png"/></div><p class="message1">'+scan+'</p></div>';
 		$('#hidden_string').val(scan);
-		handler();    	
+		handler();
 		$('.messages').append(html_code_user);
 		scroll();
-	
+
 		$('textarea').val('');
 		$("textarea").prop('disabled', true);
-	}	
+	}
 	});
 
-	
+
 
 	function handler(){
 
 	$('.messages').on("DOMSubtreeModified",function(){
-  	
+
   		var scan = $('#hidden_string').val();
 		var flag = $('#hidden_flag').val();
-		
+
 		 var obj = new Object();
          obj.text = scan;
          obj.con_id  = flag;
-		
-		
-		
+
+
+
   		$.ajax({
 			url: "http://localhost:8080/api/central",
 				method: "POST",
@@ -177,7 +177,7 @@
 					console.log(data.data.con_id);
 					$('#hidden_flag').val(data.data.con_id);
 					var answer_bot2 = data.data.text.substring(0, 4);
-					
+
 					if(answer_bot2 == "http"){
 						var html_code_bot = '<div class="chat bot"><div class="user-photo"><img src="32116498_1592737920839611_3963750000931897344_n.png"/></div><p class="message1"><a href="'+data.data.text+'" target="_blank">"Click here to see the results."</a></p></div>';
 						$('.messages').off();
@@ -185,6 +185,7 @@
 						scroll();
 						$("textarea").prop('disabled', false);
 						$("textarea").focus();
+						$("#rate").attr("hidden", false);
 
 					}else{
 						var html_code_bot = '<div class="chat bot"><div class="user-photo"><img src="32116498_1592737920839611_3963750000931897344_n.png"/></div><p class="message1">'+data.data.text+'</p></div>';
@@ -194,14 +195,14 @@
 						$("textarea").prop('disabled', false);
 						$("textarea").focus();
 					}
-					
-					
-				
+
+
+
 				}
 
 		});
 
-	
+
 	});
 
 	}
@@ -217,7 +218,7 @@
 	});
 
 	$('#rate').click(function(){
-		
+
 	})
 
 	var modal = document.getElementById('rateModal');

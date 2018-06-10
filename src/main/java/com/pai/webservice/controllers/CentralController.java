@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -23,14 +22,24 @@ import java.util.List;
 @RequestMapping(value = "/central")
 public class CentralController {
 
-
     private static ObjectMapper mapper = new ObjectMapper();
+
+    private static String amazonURL = "http://localhost:8080/api/amazon";
+
+    private static String watsonURL = "http://localhost:8080/api/watsonAst";
 
     @Autowired
     private IMongoObjRepo mongoObjRepo;
 
     @Autowired
     private CentralService centralService;
+
+    private ResponseEntity<ResponseObject> watsonAssResponse;
+    private JsonNode assistantData;
+    private JsonNode contextData;
+    private String convId;
+    private SystemResponse context;
+
 
     @PostMapping(value = "")
     public @ResponseBody
@@ -52,7 +61,7 @@ public class CentralController {
             MongoDbObject first = list.get(0);
             if(first.getQuestions() >= 8){ // condition for 20 result
                 HttpEntity<List<String>> entityAmazon = new HttpEntity<List<String>>(first.getKeywords(), headers);
-                ResponseEntity<ResponseObject> amazonResponse = restTemplate.exchange("http://localhost:8080/api/amazon", HttpMethod.POST, entityAmazon, ResponseObject.class);
+                ResponseEntity<ResponseObject> amazonResponse = restTemplate.exchange(amazonURL, HttpMethod.POST, entityAmazon, ResponseObject.class);
                 JsonNode returnData = mapper.valueToTree(amazonResponse.getBody().getData());
 
                 return new ResponseEntity<>(ResponseObject.createSuccess(Notification.TEST_GET_SUCCESS, returnData), HttpStatus.OK);
@@ -61,20 +70,13 @@ public class CentralController {
 
 
         HttpEntity<FrontObj> entityWatsonAss = new HttpEntity<FrontObj>(input, headers);
-        System.out.println(entityWatsonAss);
-
-        ResponseEntity<ResponseObject> watsonAssResponse;
-        JsonNode assData;
-        JsonNode contextData;
-        String convId;
-        SystemResponse context;
 
         try {
-            watsonAssResponse = restTemplate.exchange("http://localhost:8080/api/watsonAst", HttpMethod.POST,entityWatsonAss,ResponseObject.class);
+            watsonAssResponse = restTemplate.exchange(watsonURL, HttpMethod.POST,entityWatsonAss,ResponseObject.class);
 
             ResponseObject watsonResponse =  watsonAssResponse.getBody();
             convId = watsonResponse.getData().get("con_id").asText();
-            assData = watsonResponse.getData().get("assistantAnswer");
+            assistantData = watsonResponse.getData().get("assistantAnswer");
             contextData = watsonResponse.getData().get("systemResponse");
             context = mapper.treeToValue(contextData, SystemResponse.class);
 
@@ -87,25 +89,25 @@ public class CentralController {
 
 
         //welcome
-        if (assData.size() > 0 && assData.get("watsonData") !=null && assData.get("watsonData").asText().contains("&") && assData.get("watsonData").asText().split("&")[1].equals("W")) {
+        if (assistantData.size() > 0 && assistantData.get("watsonData") !=null && assistantData.get("watsonData").asText().contains("&") && assistantData.get("watsonData").asText().split("&")[1].equals("W")) {
 
             MongoDbObject mongoDbObject = this.centralService.prepareMongoObjInWelcome(isNew, convId, context);
             mongoObjRepo.save(mongoDbObject);
-            return new ResponseEntity<>(ResponseObject.createSuccess(Notification.TEST_GET_SUCCESS, mapper.valueToTree(this.centralService.createWatsonResponse(assData, convId))), HttpStatus.OK);
+            return new ResponseEntity<>(ResponseObject.createSuccess(Notification.TEST_GET_SUCCESS, mapper.valueToTree(this.centralService.createWatsonResponse(assistantData, convId))), HttpStatus.OK);
         }
 
         //dialog
-        if (assData.size() > 0 && assData.get("watsonData") !=null && assData.get("watsonData").asText().contains("&") && assData.get("watsonData").asText().split("&")[1].equals("T")) {
+        if (assistantData.size() > 0 && assistantData.get("watsonData") !=null && assistantData.get("watsonData").asText().contains("&") && assistantData.get("watsonData").asText().split("&")[1].equals("T")) {
 
             List<String> keywords = this.centralService.getKeywordsFromWatson(input);
             MongoDbObject mongoDbObject = this.centralService.prepareMongoObjInDialog(isNew, keywords, convId, context);
             mongoObjRepo.save(mongoDbObject);
-            return new ResponseEntity<>(ResponseObject.createSuccess(Notification.TEST_GET_SUCCESS, mapper.valueToTree(this.centralService.createWatsonResponse(assData, convId))), HttpStatus.OK);
+            return new ResponseEntity<>(ResponseObject.createSuccess(Notification.TEST_GET_SUCCESS, mapper.valueToTree(this.centralService.createWatsonResponse(assistantData, convId))), HttpStatus.OK);
         }
 
 
         //end conversation
-        if(assData.size() > 0 && assData.get("watsonData") !=null && assData.get("watsonData").asText().contains("&") && assData.get("watsonData").asText().split("&")[1].equals("K")){
+        if(assistantData.size() > 0 && assistantData.get("watsonData") !=null && assistantData.get("watsonData").asText().contains("&") && assistantData.get("watsonData").asText().split("&")[1].equals("K")){
 
             MongoDbObject mongoDbObject = null;
             List<String> resultKeywords = null;
@@ -115,17 +117,16 @@ public class CentralController {
                 return new ResponseEntity<>(ResponseObject.createSuccess(Notification.TEST_GET_SUCCESS, returnData), HttpStatus.OK);
             }
             else{
-                MongoDbObject first = this.centralService.getLastObjectFromMongo(convId);
-
-                resultKeywords = first.getKeywords();
-                if(resultKeywords.size()< 1 ){
-                    JsonNode returnData = mapper.valueToTree("Incorrect");
-
-                    return new ResponseEntity<>(ResponseObject.createSuccess(Notification.TEST_GET_SUCCESS, returnData), HttpStatus.OK);
+                if(this.centralService.checkEndConversation(convId) ){
+                    return new ResponseEntity<>(ResponseObject.createSuccess(Notification.TEST_GET_SUCCESS, mapper.valueToTree("Incorrect")), HttpStatus.OK);
                 }
+                List<String> keywords = this.centralService.getKeywordsFromWatson(input);
+                mongoDbObject = this.centralService.prepareMongoObjForEnding(isNew, keywords, convId, context);
+                mongoObjRepo.save(mongoDbObject);
+                resultKeywords = mongoDbObject.getKeywords();
             }
             HttpEntity<List<String>> entityAmazon = new HttpEntity<List<String>>(resultKeywords, headers);
-            ResponseEntity<ResponseObject> amazonResponse = restTemplate.exchange("http://localhost:8080/api/amazon", HttpMethod.POST, entityAmazon, ResponseObject.class);
+            ResponseEntity<ResponseObject> amazonResponse = restTemplate.exchange(amazonURL, HttpMethod.POST, entityAmazon, ResponseObject.class);
             return new ResponseEntity<>(ResponseObject.createSuccess(Notification.TEST_GET_SUCCESS, mapper.valueToTree(this.centralService.createAmazonResponse(amazonResponse, convId))), HttpStatus.OK);
         }
 
@@ -134,7 +135,7 @@ public class CentralController {
             MongoDbObject mongoDbObject = this.centralService.prepareMongoObjForMisunderstanding(isNew, convId, context);
 
             mongoObjRepo.save(mongoDbObject);
-            return new ResponseEntity<>(ResponseObject.createSuccess(Notification.TEST_GET_SUCCESS, mapper.valueToTree(this.centralService.createWatsonResponse(assData, convId))), HttpStatus.OK);
+            return new ResponseEntity<>(ResponseObject.createSuccess(Notification.TEST_GET_SUCCESS, mapper.valueToTree(this.centralService.createWatsonResponse(assistantData, convId))), HttpStatus.OK);
         }
 
 

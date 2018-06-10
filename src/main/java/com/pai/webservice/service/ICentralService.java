@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 public interface ICentralService {
-    public int countWords(String s);
+    boolean checkEndConversation(String convId);
     List<String> getKeywordsFromWatson(FrontObj input);
     FrontObj createWatsonResponse(JsonNode watson, String convId);
     FrontObj createAmazonResponse(ResponseEntity<ResponseObject> response, String convId);
@@ -18,4 +18,5 @@ public interface ICentralService {
     MongoDbObject prepareMongoObjInWelcome(boolean isNew, String convId, SystemResponse context);
     MongoDbObject prepareMongoObjInDialog(boolean isNew, List<String> keywords, String convId, SystemResponse context);
     MongoDbObject prepareMongoObjForMisunderstanding(boolean isNew, String convId, SystemResponse context);
+    MongoDbObject prepareMongoObjForEnding(boolean isNew, List<String> keywords, String convId, SystemResponse context);
 }

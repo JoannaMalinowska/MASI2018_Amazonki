@@ -41,7 +41,7 @@
 
 		</div>
 		<br />
-		<button class="rate" name="rate"  hidden="true" id="rate">Take a moment and rate me!!!</button>
+		<button class="rate" name="rate" hidden="true"  id="rate">Take a moment and rate me!!!</button>
 
 	</div>
 
@@ -247,7 +247,7 @@
          rate.usability = usability;
          rate.effectiveness  = effectiveness;
 
-		 $.ajax({
+		$.ajax({
 			url: "http://localhost:8080/api/centralUsability",
 				method: "POST",
 				data: JSON.stringify(rate),
@@ -255,7 +255,11 @@
 				contentType: "application/json;charset=utf-8",
 				success:function(data)
 				{
-					alert('Thank you for rating this chatbot :)');
+					modal.style.display = "none";
+					var html_code_bot = '<div class="chat bot"><div class="user-photo"><img src="32116498_1592737920839611_3963750000931897344_n.png"/></div><p class="message1">Thank you for rating my service.</p></div>';
+					$('.messages').off();
+					$('.messages').append(html_code_bot);
+					scroll();
 				}
 
 					});

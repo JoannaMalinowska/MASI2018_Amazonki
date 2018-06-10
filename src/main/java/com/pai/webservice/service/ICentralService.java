@@ -5,6 +5,7 @@ import com.ibm.watson.developer_cloud.assistant.v1.model.SystemResponse;
 import com.pai.webservice.model.FrontObj;
 import com.pai.webservice.model.MongoDbObject;
 import com.pai.webservice.model.ResponseObject;
+import com.pai.webservice.model.WatsonAssistantObject;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
@@ -19,4 +20,5 @@ public interface ICentralService {
     MongoDbObject prepareMongoObjInDialog(boolean isNew, List<String> keywords, String convId, SystemResponse context);
     MongoDbObject prepareMongoObjForMisunderstanding(boolean isNew, String convId, SystemResponse context);
     MongoDbObject prepareMongoObjForEnding(boolean isNew, List<String> keywords, String convId, SystemResponse context);
+    WatsonAssistantObject getWatsonAssistantResponse(FrontObj input) throws Exception;
 }

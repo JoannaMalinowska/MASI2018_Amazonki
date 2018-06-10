@@ -10,6 +10,7 @@ import com.pai.webservice.service.AmazonResponseService;
 import com.pai.webservice.service.AmazonService;
 import com.pai.webservice.service.CentralService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
@@ -26,32 +27,21 @@ public class AssistantController {
 
     private static ObjectMapper mapper = new ObjectMapper();
 
-
-    @Autowired
-    private AmazonService amazonService;
-
-    @Autowired
-    private AmazonResponseService amazonResponseService;
-
-    @Autowired
-    private CentralService centralService;
-
     @Autowired
     private IMongoObjRepo mongoObjRepo;
+
+    @Autowired
+    private Environment environment;
 
     @PostMapping(value = "")
     @Async
     public @ResponseBody
     ResponseEntity<ResponseObject> processWatson(@Valid @RequestBody FrontObj inputFront) {
 
-
         String conversationID = inputFront.getCon_id();
 
-        //connect with Watson - Assistant
         Assistant Assistantservice = new Assistant("2018-02-16");
-        Assistantservice.setUsernameAndPassword("eb12a14a-da23-4b5c-9f3f-d756e8f02ec2", "GJGAnVtaLuaP");
-
-        String workspaceId = "bb7f5b28-50f0-49ae-a454-df7799de94a3";
+        Assistantservice.setUsernameAndPassword(environment.getProperty("assistantWatson.username"), environment.getProperty("assistantWatson.password"));
 
         AssistantAnswer result=null;
         JsonNode returnData = null;
@@ -60,13 +50,11 @@ public class AssistantController {
 
             InputData input = new InputData.Builder(inputFront.getText()).build();
 
-            MessageOptions options = new MessageOptions.Builder(workspaceId)
+            MessageOptions options = new MessageOptions.Builder(environment.getProperty("assistantWatson.workspace"))
                     .context(new Context()).input(input)
                     .build();
 
             MessageResponse AssistantResponse = Assistantservice.message(options).execute();
-
-            List<String> data = AssistantResponse.getOutput().getNodesVisited();
 
             result = new AssistantAnswer(AssistantResponse.getOutput().getText().get(0).replace("[", "").replace("]", ""));
 
@@ -86,34 +74,32 @@ public class AssistantController {
            MongoDbObject first = list.get(0);
 
             MessageOptions secondMessageOptions = new MessageOptions.Builder()
-                    .workspaceId(workspaceId)
+                    .workspaceId(environment.getProperty("assistantWatson.workspace"))
                     .input(new InputData.Builder(inputFront.getText()).build())
                     .context(new Context())
                     .build();
 
            secondMessageOptions.context().setConversationId(conversationID);
            secondMessageOptions.context().setSystem(first.getContext());
+           MessageResponse secondResponse = Assistantservice.message(secondMessageOptions).execute();
 
-            MessageResponse secondResponse = Assistantservice.message(secondMessageOptions).execute();
+           WatsonConv respone  = new WatsonConv();
+           try {
+               result = new AssistantAnswer(secondResponse.getOutput().getText().get(0).replace("[", "").replace("]", ""));
 
+               respone.setCon_id(secondResponse.getContext().getConversationId());
+               respone.setSystemResponse(secondResponse.getContext().getSystem());
 
-               WatsonConv respone  = new WatsonConv();
-               try {
-                   result = new AssistantAnswer(secondResponse.getOutput().getText().get(0).replace("[", "").replace("]", ""));
+           }
 
-                   respone.setCon_id(secondResponse.getContext().getConversationId());
-                   respone.setSystemResponse(secondResponse.getContext().getSystem());
+           catch(Exception e){
+               result = new AssistantAnswer("I didn't understand.&G");
+               respone.setCon_id(conversationID);
+               respone.setSystemResponse(secondResponse.getContext().getSystem());
+           }
+           respone.setAssistantAnswer(result);
 
-               }
-
-               catch(Exception e){
-                   result = new AssistantAnswer("I didn't understand.&G");
-                   respone.setCon_id(conversationID);
-                   respone.setSystemResponse(secondResponse.getContext().getSystem());
-               }
-               respone.setAssistantAnswer(result);
-
-                returnData = mapper.valueToTree(respone);
+           returnData = mapper.valueToTree(respone);
 
         }
 

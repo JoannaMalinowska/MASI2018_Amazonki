@@ -40,17 +40,6 @@ public class WatsonController {
 
     private static ObjectMapper mapper = new ObjectMapper();
 
-
-    @Autowired
-    private AmazonService amazonService;
-
-    @Autowired
-    private AmazonResponseService amazonResponseService;
-
-
-    @Autowired
-    private CentralService centralService;
-
     @PostMapping(value = "")
     @Async
     public @ResponseBody ResponseEntity<ResponseObject> processWatson(@Valid @RequestBody String input) {

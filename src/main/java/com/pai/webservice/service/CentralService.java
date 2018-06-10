@@ -1,14 +1,15 @@
 package com.pai.webservice.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ibm.watson.developer_cloud.assistant.v1.model.SystemResponse;
 import com.pai.webservice.model.FrontObj;
 import com.pai.webservice.model.MongoDbObject;
 import com.pai.webservice.model.ResponseObject;
-import com.pai.webservice.notifications.Notification;
+import com.pai.webservice.model.WatsonAssistantObject;
 import com.pai.webservice.repository.IMongoObjRepo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.core.env.Environment;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -20,11 +21,14 @@ import java.util.List;
 @Service
 public class CentralService implements ICentralService {
 
-    private static String amazonURL = "http://localhost:8080/api/amazon/quantity";
-    private static String watsonURL = "http://localhost:8080/api/watson";
 
     @Autowired
     private IMongoObjRepo mongoObjRepo;
+
+    @Autowired
+    private Environment environment;
+
+    private static ObjectMapper mapper = new ObjectMapper();
 
     @Override
     public boolean checkEndConversation(String convId) {
@@ -41,7 +45,7 @@ public class CentralService implements ICentralService {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> entityWatson = new HttpEntity<String>(input.getText(), headers);
-        ResponseEntity<ResponseObject> watsonResponse = restTemplate.exchange(watsonURL, HttpMethod.POST, entityWatson, ResponseObject.class);
+        ResponseEntity<ResponseObject> watsonResponse = restTemplate.exchange(environment.getProperty("watsonURL.path"), HttpMethod.POST, entityWatson, ResponseObject.class);
 
         JsonNode data = watsonResponse.getBody().getData();
         List<String> keywords = new ArrayList<>();
@@ -92,7 +96,7 @@ public class CentralService implements ICentralService {
 
             if(first.getKeywords().size() > 0){
                 HttpEntity<List<String>> entityAmazon = new HttpEntity<List<String>>(first.getKeywords(), headers);
-                ResponseEntity<ResponseObject> amazonResponse = restTemplate.exchange(amazonURL, HttpMethod.POST, entityAmazon, ResponseObject.class);
+                ResponseEntity<ResponseObject> amazonResponse = restTemplate.exchange(environment.getProperty("amazonQuantityResultURL.path"), HttpMethod.POST, entityAmazon, ResponseObject.class);
 
                 double reduction = (double)((first.getTotalResults()-amazonResponse.getBody().getData().asInt())/(first.getTotalResults()*1.0))*100;
                 reduction = Math.round(reduction * 100.0) / 100.0;
@@ -115,7 +119,7 @@ public class CentralService implements ICentralService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         if(isNew){
             HttpEntity<List<String>> entityAmazon = new HttpEntity<List<String>>(keywords, headers);
-            ResponseEntity<ResponseObject> amazonResponse = restTemplate.exchange(amazonURL, HttpMethod.POST, entityAmazon, ResponseObject.class);
+            ResponseEntity<ResponseObject> amazonResponse = restTemplate.exchange(environment.getProperty("amazonQuantityResultURL.path"), HttpMethod.POST, entityAmazon, ResponseObject.class);
 
 
             mongoDbObject = new MongoDbObject(convId,keywords,1,amazonResponse.getBody().getData().asInt(),0, 1, context,0);
@@ -128,7 +132,7 @@ public class CentralService implements ICentralService {
 
             if(resultKeywords.size() > 0){
                 HttpEntity<List<String>> entityAmazon = new HttpEntity<List<String>>(resultKeywords, headers);
-                ResponseEntity<ResponseObject> amazonResponse = restTemplate.exchange(amazonURL, HttpMethod.POST, entityAmazon, ResponseObject.class);
+                ResponseEntity<ResponseObject> amazonResponse = restTemplate.exchange(environment.getProperty("amazonQuantityResultURL.path"), HttpMethod.POST, entityAmazon, ResponseObject.class);
 
                 double reduction = (double)((first.getTotalResults()-amazonResponse.getBody().getData().asInt())/(first.getTotalResults()*1.0))*100;
                 reduction = Math.round(reduction * 100.0) / 100.0;
@@ -158,7 +162,7 @@ public class CentralService implements ICentralService {
             keywords.forEach(item -> resultKeywords.add(item));
 
             HttpEntity<List<String>> entityAmazon = new HttpEntity<List<String>>(resultKeywords, headers);
-            ResponseEntity<ResponseObject> amazonResponse = restTemplate.exchange(amazonURL, HttpMethod.POST, entityAmazon, ResponseObject.class);
+            ResponseEntity<ResponseObject> amazonResponse = restTemplate.exchange(environment.getProperty("amazonQuantityResultURL.path"), HttpMethod.POST, entityAmazon, ResponseObject.class);
 
             double reduction = (double)((first.getTotalResults()-amazonResponse.getBody().getData().asInt())/(first.getTotalResults()*1.0))*100;
             reduction = Math.round(reduction * 100.0) / 100.0;
@@ -166,6 +170,21 @@ public class CentralService implements ICentralService {
             mongoDbObject = new MongoDbObject(convId, resultKeywords,first.getQuestions()+1,amazonResponse.getBody().getData().asInt(), first.getMisunderstoodQuestions(), first.getCounter()+1, context,reduction);
         }
         return mongoDbObject;
+    }
+
+    @Override
+    public WatsonAssistantObject getWatsonAssistantResponse(FrontObj input) throws Exception {
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<FrontObj> entityWatsonAss = new HttpEntity<FrontObj>(input, headers);
+        ResponseEntity<ResponseObject> watsonAssistantResponse;watsonAssistantResponse = restTemplate.exchange(environment.getProperty("watsonAssistantURL.path"),
+                HttpMethod.POST,entityWatsonAss,ResponseObject.class);
+
+        ResponseObject watsonResponse =  watsonAssistantResponse.getBody();
+        WatsonAssistantObject watsonAssistantObject = new WatsonAssistantObject(watsonResponse.getData().get("assistantAnswer"),
+                watsonResponse.getData().get("systemResponse"), watsonResponse.getData().get("con_id").asText(), mapper.treeToValue(watsonResponse.getData().get("systemResponse"), SystemResponse.class));
+        return watsonAssistantObject;
     }
 
     @Override

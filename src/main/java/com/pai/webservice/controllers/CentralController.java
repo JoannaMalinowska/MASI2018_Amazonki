@@ -55,11 +55,11 @@ public class CentralController {
             List<MongoDbObject> list = this.mongoObjRepo.findAllByConvId(input.getCon_id());
             Collections.sort(list);
             MongoDbObject first = list.get(0);
-            if(first.getQuestions() >= 8){ // condition for 20 result
+            if(first.getQuestions() >= 8 || (first.getTotalResults() >0 && first.getTotalResults() <=20)){ // condition for 20 result
                 HttpEntity<List<String>> entityAmazon = new HttpEntity<List<String>>(first.getKeywords(), headers);
                 ResponseEntity<ResponseObject> amazonResponse = restTemplate.exchange(env.getProperty("amazonResultURL.path"), HttpMethod.POST, entityAmazon, ResponseObject.class);
-                JsonNode returnData = mapper.valueToTree(amazonResponse.getBody().getData());
-                return new ResponseEntity<>(ResponseObject.createSuccess(Notification.TEST_GET_SUCCESS, returnData), HttpStatus.OK);
+                return new ResponseEntity<>(ResponseObject.createSuccess(Notification.TEST_GET_SUCCESS,
+                        mapper.valueToTree(this.centralService.createAmazonResponse(amazonResponse, first.getConvId()))), HttpStatus.OK);
             }
         }
 
@@ -111,7 +111,22 @@ public class CentralController {
                     return new ResponseEntity<>(ResponseObject.createSuccess(Notification.TEST_GET_SUCCESS, mapper.valueToTree("Incorrect")), HttpStatus.OK);
                 }
                 List<String> keywords = this.centralService.getKeywordsFromWatson(input);
+
+                MongoDbObject first = this.centralService.getLastObjectFromMongo(watsonAssistantObject.getConvId());
+
+                List<String> result = first.getKeywords();
+                keywords.forEach(item -> result.add(item));
+
+                HttpEntity<List<String>> entityAmazon = new HttpEntity<List<String>>(result, headers);
+                ResponseEntity<ResponseObject> amazonResponse = restTemplate.exchange(env.getProperty("amazonQuantityResultURL.path"), HttpMethod.POST, entityAmazon, ResponseObject.class);
+
+                int quantity = amazonResponse.getBody().getData().asInt();
+                if(quantity == 0)
+                    keywords = result.subList(0, result.size()-1);
+
                 mongoDbObject = this.centralService.prepareMongoObjForEnding(isNew, keywords, watsonAssistantObject.getConvId(), watsonAssistantObject.getContext());
+                if(quantity ==0)
+                    mongoDbObject.setKeywords(keywords);
                 mongoObjRepo.save(mongoDbObject);
                 resultKeywords = mongoDbObject.getKeywords();
             }

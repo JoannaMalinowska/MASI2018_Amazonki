@@ -196,14 +196,14 @@ $RECYCLE.BIN/
 ### Angular ###
 ## Angular ##
 # compiled output
-./angular/dist
-./angular/tmp
-./angular/app/**/*.js
-./angular/app/**/*.js.map
+/dist
+/tmp
+/app/**/*.js
+/app/**/*.js.map
 
 # dependencies
-./angular/node_modules
-./angular/bower_components
+/angular/node_modules
+/angular/bower_components
 
 # IDEs and editors
 ./WebService/.idea

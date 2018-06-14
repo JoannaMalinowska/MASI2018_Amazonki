@@ -67,28 +67,28 @@ local.properties
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
 
 # User-specific stuff:
-.idea/**/workspace.xml
-.idea/**/tasks.xml
-.idea/dictionaries
+./WebService/.idea/**/workspace.xml
+./WebService/.idea/**/tasks.xml
+./WebService/.idea/dictionaries
 
 # Sensitive or high-churn files:
-.idea/**/dataSources/
-.idea/**/dataSources.ids
-.idea/**/dataSources.xml
-.idea/**/dataSources.local.xml
-.idea/**/sqlDataSources.xml
-.idea/**/dynamic.xml
-.idea/**/uiDesigner.xml
+./WebService/.idea/**/dataSources/
+./WebService/.idea/**/dataSources.ids
+./WebService/.idea/**/dataSources.xml
+./WebService/.idea/**/dataSources.local.xml
+./WebService/.idea/**/sqlDataSources.xml
+./WebService/.idea/**/dynamic.xml
+./WebService/.idea/**/uiDesigner.xml
 
 # Gradle:
-.idea/**/gradle.xml
-.idea/**/libraries
+./.idea/**/gradle.xml
+./.idea/**/libraries
 
 # CMake
 cmake-build-debug/
 
 # Mongo Explorer plugin:
-.idea/**/mongoSettings.xml
+./.idea/**/mongoSettings.xml
 
 ## File-based project format:
 *.iws
@@ -105,7 +105,7 @@ cmake-build-debug/
 atlassian-ide-plugin.xml
 
 # Cursive Clojure plugin
-.idea/replstate.xml
+./.idea/replstate.xml
 
 # Ruby plugin and RubyMine
 /.rakeTasks
@@ -196,17 +196,17 @@ $RECYCLE.BIN/
 ### Angular ###
 ## Angular ##
 # compiled output
-/dist
-/tmp
-/app/**/*.js
-/app/**/*.js.map
+./angular/dist
+./angular/tmp
+./angular/app/**/*.js
+./angular/app/**/*.js.map
 
 # dependencies
-/node_modules
-/bower_components
+./angular/node_modules
+./angular/bower_components
 
 # IDEs and editors
-/.idea
+./WebService/.idea
 
 # misc
 /.sass-cache

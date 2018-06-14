@@ -1,0 +1,268 @@
+<!DOCTYPE HTML>
+<html lang="pl">
+<head>
+
+	<meta charset="utf-8"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<title>Amazon chatbox</title>
+
+	<link rel="stylesheet" type="text/css" href="style.css">
+	<link rel="stylesheet" type="text/css" href="modal.css">
+
+	<script type="text/javascript" src="jquery.min.js"></script>
+
+</head>
+
+<body>
+		<div class="background-image"></div>
+
+	<div class="chatbox" name="chatbox" id="chatbox">
+		<div class="messages" name="messages" id="messages">
+			<div class="chat bot">
+				<div class="user-photo"><img src="32116498_1592737920839611_3963750000931897344_n.png"/></div>
+				<p class="message1">Hi, I am Larry. <BR>I can help you to choose historical or biographical book.<BR>Which category would you like?</p>
+
+			</div>
+
+
+		</div>
+
+		<div class="bottom">
+			<br />
+			<textarea id="textarea"></textarea>
+			<button name="send" id="send">Send</button>
+
+			<input type="hidden" name="hidden_string" id="hidden_string">
+			<input type="hidden" name="hidden_flag" id="hidden_flag" value="-1">
+
+
+
+		</div>
+		<br />
+		<button class="rate" name="rate" hidden="true"  id="rate">Take a moment and rate me!!!</button>
+
+	</div>
+
+
+</body>
+</html>
+
+<!--modal-->
+
+<div id="rateModal" class="modal">
+	<div class="modal-content">
+			<div class="modal-header">
+				<span class="close">&times;</span>
+			</div>
+			<div class="modal-body">
+				<div class="container">
+				<p class="p5">USABILITY:</p>
+				<br />
+
+				<form id="ratingsForm">
+						<div class="stars">
+							<input type="radio" name="star" class="star-1" id="star-1" value="1" />
+							<label class="star-1" for="star-1">1</label>
+							<input type="radio" name="star" class="star-2" id="star-2" value="2" />
+							<label class="star-2" for="star-2">2</label>
+							<input type="radio" name="star" class="star-3" id="star-3" value="3"/>
+							<label class="star-3" for="star-3">3</label>
+							<input type="radio" name="star" class="star-4" id="star-4" value="4"/>
+							<label class="star-4" for="star-4">4</label>
+							<input type="radio" name="star" class="star-5" id="star-5" value="5"/>
+							<label class="star-5" for="star-5">5</label>
+							<input type="radio" name="star" class="star-6" id="star-6" value="6"/>
+							<label class="star-6" for="star-6">6</label>
+							<input type="radio" name="star" class="star-7" id="star-7" value="7"/>
+							<label class="star-7" for="star-7">7</label>
+							<input type="radio" name="star" class="star-8" id="star-8" value="8"/>
+							<label class="star-8" for="star-8">8</label>
+							<input type="radio" name="star" class="star-9" id="star-9" value="9"/>
+							<label class="star-9" for="star-9">9</label>
+							<input type="radio" name="star" class="star-10" id="star-10" value="10"/>
+							<label class="star-10" for="star-10">10</label>
+							<span></span>
+						</div>
+					</form>
+
+				<br />
+
+				<p class="p5">EFFECTIVENESS: </p>
+				<br />
+
+				<form id="ratingsForm2">
+						<div class="stars2">
+							<input type="radio" name="star2" class="star2-1" id="star2-1" value="1" />
+							<label class="star2-1" for="star2-1">1</label>
+							<input type="radio" name="star2" class="star2-2" id="star2-2" value="2" />
+							<label class="star2-2" for="star2-2">2</label>
+							<input type="radio" name="star2" class="star2-3" id="star2-3" value="3"/>
+							<label class="star2-3" for="star2-3">3</label>
+							<input type="radio" name="star2" class="star2-4" id="star2-4" value="4"/>
+							<label class="star2-4" for="star2-4">4</label>
+							<input type="radio" name="star2" class="star2-5" id="star2-5" value="5"/>
+							<label class="star2-5" for="star2-5">5</label>
+							<input type="radio" name="star2" class="star2-6" id="star2-6" value="6"/>
+							<label class="star2-6" for="star2-6">6</label>
+							<input type="radio" name="star2" class="star2-7" id="star2-7" value="7"/>
+							<label class="star2-7" for="star2-7">7</label>
+							<input type="radio" name="star2" class="star2-8" id="star2-8" value="8"/>
+							<label class="star2-8" for="star2-8">8</label>
+							<input type="radio" name="star2" class="star2-9" id="star2-9" value="9"/>
+							<label class="star2-9" for="star2-9">9</label>
+							<input type="radio" name="star2" class="star2-10" id="star2-10" value="10"/>
+							<label class="star2-10" for="star2-10">10</label>
+							<span></span>
+						</div>
+					</form>
+			</div>
+			</div>
+
+			<div class="modal-footer">
+				<br /><br />
+				<button type="button" class="rateBtn" id="rateBtn"> Rate me!!</button>
+			</div>
+	</div>
+</div>
+
+
+<script>
+
+	$('#send').on('click', function(){
+
+
+		var scan = document.getElementById("textarea").value;
+
+		if(scan == ""){
+			alert("Nic nie wpisałeś!!!");
+		}else{
+
+		var html_code_user = '<div class="chat user"><div class="user-photo"><img src="user-512.png"/></div><p class="message1">'+scan+'</p></div>';
+		$('#hidden_string').val(scan);
+		handler();
+		$('.messages').append(html_code_user);
+		scroll();
+
+		$('textarea').val('');
+		$("textarea").prop('disabled', true);
+	}
+	});
+
+
+
+	function handler(){
+
+	$('.messages').on("DOMSubtreeModified",function(){
+
+  		var scan = $('#hidden_string').val();
+		var flag = $('#hidden_flag').val();
+
+		 var obj = new Object();
+         obj.text = scan;
+         obj.con_id  = flag;
+
+
+
+  		$.ajax({
+			url: "http://localhost:8080/api/central",
+				method: "POST",
+				data: JSON.stringify(obj),
+				dataType: "json",
+				contentType: "application/json;charset=utf-8",
+				success:function(data)
+				{
+
+					console.log(data.data.con_id);
+					$('#hidden_flag').val(data.data.con_id);
+					var answer_bot2 = data.data.text.substring(0, 4);
+
+					if(answer_bot2 == "http"){
+						var html_code_bot = '<div class="chat bot"><div class="user-photo"><img src="32116498_1592737920839611_3963750000931897344_n.png"/></div><p class="message1"><a href="'+data.data.text+'" target="_blank">"Click here to see the results."</a></p></div>';
+						$('.messages').off();
+    					$('.messages').append(html_code_bot);
+						scroll();
+						$("textarea").prop('disabled', false);
+						$("textarea").focus();
+						$("#rate").attr("hidden", false);
+
+					}else{
+						var html_code_bot = '<div class="chat bot"><div class="user-photo"><img src="32116498_1592737920839611_3963750000931897344_n.png"/></div><p class="message1">'+data.data.text+'</p></div>';
+						$('.messages').off();
+    					$('.messages').append(html_code_bot);
+						scroll();
+						$("textarea").prop('disabled', false);
+						$("textarea").focus();
+					}
+
+
+
+				}
+
+		});
+
+
+	});
+
+	}
+
+	function scroll(){
+		$('#messages').scrollTop(100000000);
+	}
+
+	$(document).keypress(function(e){
+    if (e.which == 13){
+        $("#send").click();
+    		}
+	});
+
+	$('#rate').click(function(){
+
+	})
+
+	var modal = document.getElementById('rateModal');
+	var btn = document.getElementById("rate");
+	var span = document.getElementsByClassName("close")[0];
+
+	btn.onclick = function() {
+    modal.style.display = "block";
+	}
+
+	span.onclick = function() {
+    modal.style.display = "none";
+	}
+
+	window.onclick = function(event) {
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+	}
+
+	$('#rateBtn').click(function(){
+		var usability = $('input[name="star"]:checked').val();
+		var effectiveness = $('input[name="star2"]:checked').val();
+
+		var rate = new Object();
+         rate.usability = usability;
+         rate.effectiveness  = effectiveness;
+
+		$.ajax({
+			url: "http://localhost:8080/api/centralUsability",
+				method: "POST",
+				data: JSON.stringify(rate),
+				dataType: "json",
+				contentType: "application/json;charset=utf-8",
+				success:function(data)
+				{
+					modal.style.display = "none";
+					var html_code_bot = '<div class="chat bot"><div class="user-photo"><img src="32116498_1592737920839611_3963750000931897344_n.png"/></div><p class="message1">Thank you for rating my service.</p></div>';
+					$('.messages').off();
+					$('.messages').append(html_code_bot);
+					scroll();
+				}
+
+					});
+	});
+
+	</script>

@@ -1,0 +1,102 @@
+<div class="background-image">
+</div>
+
+<div class="chatbox" name="chatbox" id="chatbox">
+    <div class="messages" name="messages" id="messages">
+        <div class="chat bot">
+            <div class="user-photo"><img src="/assets/chatbot_avatar.png" /></div>
+            <p class="message1">Hi, I am Larry.
+                <BR>I can help you to choose historical or biographical book.
+                <BR>Which category would you like?</p>
+
+        </div>
+    </div>
+
+    <div class="bottom">
+        <br />
+        <textarea id="textarea"></textarea>
+        <button name="send" id="send">Send</button>
+
+        <input type="hidden" name="hidden_string" id="hidden_string">
+        <input type="hidden" name="hidden_flag" id="hidden_flag" value="-1">
+    </div>
+    <br />
+    <button class="rate" name="rate" hidden="true" id="rate">Take a moment and rate me!!!</button>
+
+</div>
+
+<div id="rateModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span class="close">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div class="container">
+                <p class="p5">USABILITY:</p>
+                <br />
+
+                <form id="ratingsForm">
+                    <div class="stars">
+                        <input type="radio" name="star" class="star-1" id="star-1" value="1" />
+                        <label class="star-1" for="star-1">1</label>
+                        <input type="radio" name="star" class="star-2" id="star-2" value="2" />
+                        <label class="star-2" for="star-2">2</label>
+                        <input type="radio" name="star" class="star-3" id="star-3" value="3" />
+                        <label class="star-3" for="star-3">3</label>
+                        <input type="radio" name="star" class="star-4" id="star-4" value="4" />
+                        <label class="star-4" for="star-4">4</label>
+                        <input type="radio" name="star" class="star-5" id="star-5" value="5" />
+                        <label class="star-5" for="star-5">5</label>
+                        <input type="radio" name="star" class="star-6" id="star-6" value="6" />
+                        <label class="star-6" for="star-6">6</label>
+                        <input type="radio" name="star" class="star-7" id="star-7" value="7" />
+                        <label class="star-7" for="star-7">7</label>
+                        <input type="radio" name="star" class="star-8" id="star-8" value="8" />
+                        <label class="star-8" for="star-8">8</label>
+                        <input type="radio" name="star" class="star-9" id="star-9" value="9" />
+                        <label class="star-9" for="star-9">9</label>
+                        <input type="radio" name="star" class="star-10" id="star-10" value="10" />
+                        <label class="star-10" for="star-10">10</label>
+                        <span></span>
+                    </div>
+                </form>
+
+                <br />
+
+                <p class="p5">EFFECTIVENESS: </p>
+                <br />
+
+                <form id="ratingsForm2">
+                    <div class="stars2">
+                        <input type="radio" name="star2" class="star2-1" id="star2-1" value="1" />
+                        <label class="star2-1" for="star2-1">1</label>
+                        <input type="radio" name="star2" class="star2-2" id="star2-2" value="2" />
+                        <label class="star2-2" for="star2-2">2</label>
+                        <input type="radio" name="star2" class="star2-3" id="star2-3" value="3" />
+                        <label class="star2-3" for="star2-3">3</label>
+                        <input type="radio" name="star2" class="star2-4" id="star2-4" value="4" />
+                        <label class="star2-4" for="star2-4">4</label>
+                        <input type="radio" name="star2" class="star2-5" id="star2-5" value="5" />
+                        <label class="star2-5" for="star2-5">5</label>
+                        <input type="radio" name="star2" class="star2-6" id="star2-6" value="6" />
+                        <label class="star2-6" for="star2-6">6</label>
+                        <input type="radio" name="star2" class="star2-7" id="star2-7" value="7" />
+                        <label class="star2-7" for="star2-7">7</label>
+                        <input type="radio" name="star2" class="star2-8" id="star2-8" value="8" />
+                        <label class="star2-8" for="star2-8">8</label>
+                        <input type="radio" name="star2" class="star2-9" id="star2-9" value="9" />
+                        <label class="star2-9" for="star2-9">9</label>
+                        <input type="radio" name="star2" class="star2-10" id="star2-10" value="10" />
+                        <label class="star2-10" for="star2-10">10</label>
+                        <span></span>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <br /><br />
+            <button type="button" class="rateBtn" id="rateBtn"> Rate me!!</button>
+        </div>
+    </div>
+</div>

@@ -72,17 +72,17 @@ local.properties
 ./WebService/.idea/dictionaries
 
 # Sensitive or high-churn files:
-./WebService/.idea/**/dataSources/
-./WebService/.idea/**/dataSources.ids
-./WebService/.idea/**/dataSources.xml
-./WebService/.idea/**/dataSources.local.xml
-./WebService/.idea/**/sqlDataSources.xml
-./WebService/.idea/**/dynamic.xml
-./WebService/.idea/**/uiDesigner.xml
+/WebService/.idea/**/dataSources/
+/WebService/.idea/**/dataSources.ids
+/WebService/.idea/**/dataSources.xml
+/WebService/.idea/**/dataSources.local.xml
+/WebService/.idea/**/sqlDataSources.xml
+/WebService/.idea/**/dynamic.xml
+/WebService/.idea/**/uiDesigner.xml
 
 # Gradle:
-./.idea/**/gradle.xml
-./.idea/**/libraries
+/WebService/.idea/**/gradle.xml
+/WebService/.idea/**/libraries
 
 # CMake
 cmake-build-debug/
